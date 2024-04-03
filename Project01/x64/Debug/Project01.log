@@ -1,5 +1,9 @@
-﻿  Main.cpp
-C:\Users\peter\Desktop\Project01\glfw-3.4.bin.WIN64\include\GLFW\glfw3.h(3235,1): warning C4819: 檔案含有無法在目前字碼頁 (950) 中表示的字元。請以 Unicode 格式儲存檔案以防止資料遺失
+﻿  LoadShaders.cpp
+  Main.cpp
+C:\Users\st990\Documents\FCG_Project01\glfw-3.4.bin.WIN64\include\GLFW\glfw3.h(3173,1): warning C4819: 檔案含有無法在目前字碼頁 (950) 中表示的字元。請以 Unicode 格式儲存檔案以防止資料遺失
   (編譯來源檔案 'Main.cpp')
   
-  Project01.vcxproj -> C:\Users\peter\Desktop\Project01\x64\Debug\Project01.exe
+  正在產生程式碼...
+  glad.c
+LINK : warning LNK4098: 預設的程式庫 'MSVCRT' 與其他使用的程式庫衝突，請使用 /NODEFAULTLIB:library
+  Project01.vcxproj -> C:\Users\st990\Documents\FCG_Project01\x64\Debug\Project01.exe

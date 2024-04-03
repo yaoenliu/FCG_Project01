@@ -24,6 +24,12 @@
     <ClCompile Include="..\glad\src\glad.c">
       <Filter>來源檔案</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\OneDrive\桌面\Robot-RX78(vs2015)\Robot-RX78\Robot\objloader.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Downloads\LoadShaders.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="FragmentShader.glsl">
@@ -32,5 +38,13 @@
     <None Include="VertexShader.glsl">
       <Filter>Shader</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\OneDrive\桌面\Robot-RX78(vs2015)\Robot-RX78\Robot\objloader.hpp">
+      <Filter>來源檔案</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\LoadShaders.h">
+      <Filter>來源檔案</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
