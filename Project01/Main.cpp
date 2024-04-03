@@ -6,6 +6,7 @@
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
+#include <LoadShaders.h>
 #include <fstream>
 #include <string>
 
@@ -19,20 +20,27 @@ glm::mat4 rotation;
 glm::mat4 proj;
 glm::mat4 view;
 glm::vec4 color;
+ShaderInfo shaders[] = {
+	{GL_VERTEX_SHADER, "vertexShader.glsl"},
+	{GL_FRAGMENT_SHADER, "fragmentShader.glsl"},
+	{GL_NONE, NULL}
+};
+
+
 
 int main()
 {
-	
+
 	// Initialize GLFW
 	if (!glfwInit())
-		return -1;	
+		return -1;
 
 	// Create a windowed mode window and its OpenGL context
 	GLFWwindow* window = glfwCreateWindow(RESOLUTION, "Hello World", NULL, NULL);
 	proj = glm::perspective(glm::radians(45.0f), 640.0f / 480.0f, 0.1f, 100.0f);
-	view = glm::lookAt (glm::vec3(0.0f, 2.0f, 3.0f), // camera position
-								glm::vec3(0.0f, 0.0f, 0.0f), // target position
-								glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
+	view = glm::lookAt(glm::vec3(0.0f, 2.0f, 3.0f), // camera position
+		glm::vec3(0.0f, 0.0f, 0.0f), // target position
+		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
 	rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	srand(time(NULL));
 	color = glm::vec4(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, 1.0f);
@@ -41,9 +49,6 @@ int main()
 		glfwTerminate();
 		return -1;
 	}
-
-
-
 
 	// Set the key callback function
 	glfwSetKeyCallback(window, key_callback);
@@ -57,43 +62,7 @@ int main()
 	// Initialize GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		return -1;
-	// Load the vertex and fragment shaders
-	const char* vs = R"(
-		#version 330 core
-		layout(location = 0) in vec3 aPos;
-		uniform mat4 rotation;
-		uniform mat4 view;
-		uniform mat4 proj;
-		void main()
-		{
-			gl_Position = proj*view*rotation*vec4(aPos, 1.0);
-		}
-	)";
-	const char* fs = R"(
-		#version 330 core
-		out vec4 FragColor;
-		uniform vec4 ourColor;
-		void main()
-		{
-			FragColor = ourColor;
-		}
-	)";
 
-	// Create the vertex shader
-	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vs, NULL);
-	glCompileShader(vertexShader);
-
-	// Create the fragment shader
-	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fs, NULL);
-	glCompileShader(fragmentShader);
-
-	// Create the shader program
-	unsigned int shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
 
 	// Draw the triangle
 	float vertices[] = {
@@ -117,6 +86,8 @@ int main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
+	GLuint shaderProgram = LoadShaders(shaders);
+
 	// Use the shader program
 	glUseProgram(shaderProgram);
 
@@ -131,13 +102,11 @@ int main()
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
-	float angle = 0.0f;
-	
+	float angle = 90.0f;
+
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(window))
 	{
-		
-
 
 		// Render here
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -165,16 +134,25 @@ int main()
 		ImGui::SetWindowSize(ImVec2(IMGUI_RESOLUTION));
 		ImGui::Text("This is some useful text.");
 		// a slider for changing the rotation angle
-		ImGui::SliderFloat("angle", &angle, -180.0f, 180.0f);
-		view = glm::lookAt (glm::vec3(3 * cos(glm::radians(angle)), 2.0f, 3*sin(glm::radians(angle))), // camera position
-								glm::vec3(0.0f, 0.0f, 0.0f), // target position
-								glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
+		ImGui::SliderFloat("angle", &angle, -179.0f, 179.0f);
+		if (angle == 0.0f) // make sure the triangle is always visible
+			angle = 0.1f;
+		view = glm::lookAt(glm::vec3(3 * cos(glm::radians(angle)), 2.0f, 3 * sin(glm::radians(angle))), // camera position
+			glm::vec3(0.0f, 0.0f, 0.0f), // target position
+			glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
 		ImGui::ColorEdit3("color", &color[0]);
 
 		// Random Color Button
 		if (ImGui::Button("Random Color"))
 		{
 			color = glm::vec4(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, 1.0f);
+		}
+		// Show FPS
+		ImGui::Text(" frame generated in %.3f ms\n FPS: %.1f", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+		if (ImGui::Button("Quit"))
+		{
+			glfwSetWindowShouldClose(window, GLFW_TRUE);
 		}
 
 		ImGui::End();
@@ -187,7 +165,7 @@ int main()
 		// Swap front and back buffers
 		glfwSwapBuffers(window);
 	}
-	
+
 	// Terminate GLFW
 	glfwTerminate();
 	return 0;

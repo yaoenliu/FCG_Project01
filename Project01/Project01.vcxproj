@@ -105,7 +105,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)glad\include\;$(SolutionDir)glfw-3.4.bin.WIN64\include;$(SolutionDir)glm;$(SolutionDir)imgui-1.90.4;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)glad\include\;$(SolutionDir)glfw-3.4.bin.WIN64\include;$(SolutionDir)glm;$(SolutionDir)imgui-1.90.4;$(SolutionDir)LoadShaders;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,6 +139,7 @@
     <ClCompile Include="..\imgui-1.90.4\imgui_draw.cpp" />
     <ClCompile Include="..\imgui-1.90.4\imgui_tables.cpp" />
     <ClCompile Include="..\imgui-1.90.4\imgui_widgets.cpp" />
+    <ClCompile Include="..\LoadShaders\LoadShaders.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -154,6 +155,7 @@
     <ClInclude Include="..\imgui-1.90.4\imstb_rectpack.h" />
     <ClInclude Include="..\imgui-1.90.4\imstb_textedit.h" />
     <ClInclude Include="..\imgui-1.90.4\imstb_truetype.h" />
+    <ClInclude Include="..\LoadShaders\LoadShaders.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
