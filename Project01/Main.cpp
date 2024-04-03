@@ -3,8 +3,12 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
 #include <fstream>
 #include <string>
+
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -15,6 +19,7 @@ glm::mat4 view;
 
 int main()
 {
+	
 	// Initialize GLFW
 	if (!glfwInit())
 		return -1;
@@ -30,6 +35,10 @@ int main()
 		glfwTerminate();
 		return -1;
 	}
+
+
+
+
 	// Set the key callback function
 	glfwSetKeyCallback(window, key_callback);
 
@@ -104,9 +113,25 @@ int main()
 	// Use the shader program
 	glUseProgram(shaderProgram);
 
+	// setup imgui
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
+
+
+
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(window))
 	{
+		
+
+
 		// Render here
 		glClear(GL_COLOR_BUFFER_BIT);
 
@@ -121,11 +146,23 @@ int main()
 		// Draw the triangle
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
-		// Swap front and back buffers
-		glfwSwapBuffers(window);
-
 		// Poll for and process events
 		glfwPollEvents();
+
+		// imgui
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		ImGui::Begin("Hello, world!");
+		ImGui::Text("This is some useful text.");
+		ImGui::End();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		// Swap front and back buffers
+		glfwSwapBuffers(window);
 	}
 
 	// Terminate GLFW

@@ -16,6 +16,12 @@
     <Filter Include="Shader">
       <UniqueIdentifier>{b12c29db-9172-4907-aaa4-9517e68f4a59}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ImGui">
+      <UniqueIdentifier>{1f14067c-e075-4029-bf5a-3a587592ab82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImGui\backends">
+      <UniqueIdentifier>{7fb76b02-b017-46fd-b841-8a5ce68580f8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -23,6 +29,27 @@
     </ClCompile>
     <ClCompile Include="..\glad\src\glad.c">
       <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="..\imgui-1.90.4\imgui.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\imgui-1.90.4\imgui_demo.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\imgui-1.90.4\imgui_draw.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\imgui-1.90.4\imgui_tables.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\imgui-1.90.4\imgui_widgets.cpp">
+      <Filter>ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\imgui-1.90.4\backends\imgui_impl_glfw.cpp">
+      <Filter>ImGui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\imgui-1.90.4\backends\imgui_impl_opengl3.cpp">
+      <Filter>ImGui\backends</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -32,5 +59,31 @@
     <None Include="VertexShader.glsl">
       <Filter>Shader</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\imgui-1.90.4\imconfig.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\imgui-1.90.4\imgui.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\imgui-1.90.4\imgui_internal.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\imgui-1.90.4\imstb_rectpack.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\imgui-1.90.4\imstb_textedit.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\imgui-1.90.4\imstb_truetype.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\imgui-1.90.4\backends\imgui_impl_glfw.h">
+      <Filter>ImGui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="..\imgui-1.90.4\backends\imgui_impl_opengl3.h">
+      <Filter>ImGui\backends</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
