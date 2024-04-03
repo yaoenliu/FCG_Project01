@@ -9,6 +9,8 @@
 #include <fstream>
 #include <string>
 
+#define RESOLUTION 1920, 1080
+#define IMGUI_RESOLUTION 480, 270
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -16,20 +18,24 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 glm::mat4 rotation;
 glm::mat4 proj;
 glm::mat4 view;
+glm::vec4 color;
 
 int main()
 {
 	
 	// Initialize GLFW
 	if (!glfwInit())
-		return -1;
+		return -1;	
 
 	// Create a windowed mode window and its OpenGL context
-	GLFWwindow* window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(RESOLUTION, "Hello World", NULL, NULL);
 	proj = glm::perspective(glm::radians(45.0f), 640.0f / 480.0f, 0.1f, 100.0f);
-	view = glm::lookAt (glm::vec3(0.0f, 0.0f, 3.0f), // camera position
+	view = glm::lookAt (glm::vec3(0.0f, 2.0f, 3.0f), // camera position
 								glm::vec3(0.0f, 0.0f, 0.0f), // target position
 								glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
+	rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	srand(time(NULL));
+	color = glm::vec4(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, 1.0f);
 	if (!window)
 	{
 		glfwTerminate();
@@ -66,9 +72,10 @@ int main()
 	const char* fs = R"(
 		#version 330 core
 		out vec4 FragColor;
+		uniform vec4 ourColor;
 		void main()
 		{
-			FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+			FragColor = ourColor;
 		}
 	)";
 
@@ -124,8 +131,8 @@ int main()
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
-
-
+	float angle = 0.0f;
+	
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(window))
 	{
@@ -136,11 +143,11 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// rotation
-		glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
 		GLint rotationLoc = glGetUniformLocation(shaderProgram, "rotation");
 		glUniformMatrix4fv(rotationLoc, 1, GL_FALSE, &rotation[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "proj"), 1, GL_FALSE, &proj[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
+		glUniform4fv(glGetUniformLocation(shaderProgram, "ourColor"), 1, &color[0]);
 
 
 		// Draw the triangle
@@ -155,8 +162,24 @@ int main()
 		ImGui::NewFrame();
 
 		ImGui::Begin("Hello, world!");
+		ImGui::SetWindowSize(ImVec2(IMGUI_RESOLUTION));
 		ImGui::Text("This is some useful text.");
+		// a slider for changing the rotation angle
+		ImGui::SliderFloat("angle", &angle, -180.0f, 180.0f);
+		view = glm::lookAt (glm::vec3(3 * cos(glm::radians(angle)), 2.0f, 3*sin(glm::radians(angle))), // camera position
+								glm::vec3(0.0f, 0.0f, 0.0f), // target position
+								glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
+		ImGui::ColorEdit3("color", &color[0]);
+
+		// Random Color Button
+		if (ImGui::Button("Random Color"))
+		{
+			color = glm::vec4(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, 1.0f);
+		}
+
 		ImGui::End();
+
+
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -164,7 +187,7 @@ int main()
 		// Swap front and back buffers
 		glfwSwapBuffers(window);
 	}
-
+	
 	// Terminate GLFW
 	glfwTerminate();
 	return 0;
