@@ -1,9 +1,8 @@
-﻿  LoadShaders.cpp
-  Main.cpp
+﻿  Main.cpp
 C:\Users\st990\Documents\FCG_Project01\glfw-3.4.bin.WIN64\include\GLFW\glfw3.h(3173,1): warning C4819: 檔案含有無法在目前字碼頁 (950) 中表示的字元。請以 Unicode 格式儲存檔案以防止資料遺失
   (編譯來源檔案 'Main.cpp')
   
-  正在產生程式碼...
-  glad.c
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.39.33519\include\filesystem(12): warning STL4038: The contents of <filesystem> are available only with C++17 or later.
+C:\Users\st990\Documents\FCG_Project01\Project01\Main.cpp(107,32): warning C4305: '引數': 從 'double' 轉換為 'GLfloat'，是由較大的類型轉換為較小的類型，可能導致資料遺失
 LINK : warning LNK4098: 預設的程式庫 'MSVCRT' 與其他使用的程式庫衝突，請使用 /NODEFAULTLIB:library
   Project01.vcxproj -> C:\Users\st990\Documents\FCG_Project01\x64\Debug\Project01.exe

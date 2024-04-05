@@ -105,13 +105,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)glad\include\;$(SolutionDir)glfw-3.4.bin.WIN64\include;$(SolutionDir)glm;$(SolutionDir)GL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)glad\include\;$(SolutionDir)glfw-3.4.bin.WIN64\include;$(SolutionDir)glm;$(SolutionDir)GL;$(SolutionDir)assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;glew32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)glfw-3.4.bin.WIN64\lib-vc2022;$(SolutionDir)GL;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;glew32.lib;glew32s.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)glfw-3.4.bin.WIN64\lib-vc2022;$(SolutionDir)GL;$(SolutionDir)assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -131,18 +131,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\Downloads\LoadShaders.cpp" />
-    <ClCompile Include="..\..\..\OneDrive\桌面\Robot-RX78(vs2015)\Robot-RX78\Robot\objloader.cpp" />
     <ClCompile Include="..\glad\src\glad.c" />
+    <ClCompile Include="LoadShaders.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="objloader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="1.model_loading.fs" />
+    <None Include="1.model_loading.vs" />
     <None Include="FragmentShader.glsl" />
     <None Include="VertexShader.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Downloads\LoadShaders.h" />
-    <ClInclude Include="..\..\..\OneDrive\桌面\Robot-RX78(vs2015)\Robot-RX78\Robot\objloader.hpp" />
+    <ClInclude Include="camera.h" />
+    <ClInclude Include="LoadShaders.hpp" />
+    <ClInclude Include="mesh.hpp" />
+    <ClInclude Include="model.hpp" />
+    <ClInclude Include="objloader.hpp" />
+    <ClInclude Include="shader.hpp" />
+    <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -24,10 +24,10 @@
     <ClCompile Include="..\glad\src\glad.c">
       <Filter>來源檔案</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\OneDrive\桌面\Robot-RX78(vs2015)\Robot-RX78\Robot\objloader.cpp">
+    <ClCompile Include="objloader.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Downloads\LoadShaders.cpp">
+    <ClCompile Include="LoadShaders.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,13 +38,30 @@
     <None Include="VertexShader.glsl">
       <Filter>Shader</Filter>
     </None>
+    <None Include="1.model_loading.vs" />
+    <None Include="1.model_loading.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\OneDrive\桌面\Robot-RX78(vs2015)\Robot-RX78\Robot\objloader.hpp">
-      <Filter>來源檔案</Filter>
+    <ClInclude Include="objloader.hpp">
+      <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Downloads\LoadShaders.h">
-      <Filter>來源檔案</Filter>
+    <ClInclude Include="LoadShaders.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="model.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="shader.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
