@@ -5,5 +5,5 @@ uniform mat4 view;
 uniform mat4 proj;
 void main()
 {
-	gl_Position = proj*view*rotation*vec4(aPos, 1.0);
+	gl_Position = /*proj*view*rotation**/vec4(aPos, 1.0);
 }

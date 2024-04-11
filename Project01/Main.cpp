@@ -7,11 +7,9 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <LoadShaders.h>
+#include "Object.h"
 #include <fstream>
 #include <string>
-
-#define RESOLUTION 1920, 1080
-#define IMGUI_RESOLUTION 480, 270
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -36,7 +34,7 @@ int main()
 		return -1;
 
 	// Create a windowed mode window and its OpenGL context
-	GLFWwindow* window = glfwCreateWindow(RESOLUTION, "Hello World", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(1920, 1080, "Hello World", NULL, NULL);
 	proj = glm::perspective(glm::radians(45.0f), 640.0f / 480.0f, 0.1f, 100.0f);
 	view = glm::lookAt(glm::vec3(0.0f, 2.0f, 3.0f), // camera position
 		glm::vec3(0.0f, 0.0f, 0.0f), // target position
@@ -88,8 +86,16 @@ int main()
 
 	GLuint shaderProgram = LoadShaders(shaders);
 
+	Object obj;
+	obj.Init(shaderProgram);
+	obj.pushVertex(glm::vec3(-0.5f, -0.5f, 0.0f));
+	obj.pushVertex(glm::vec3(0.5f, -0.5f, 0.0f));
+	obj.pushVertex(glm::vec3(0.0f, 0.5f, 0.0f));
+	
+
 	// Use the shader program
 	glUseProgram(shaderProgram);
+
 
 	// setup imgui
 	IMGUI_CHECKVERSION();
@@ -120,8 +126,8 @@ int main()
 
 
 		// Draw the triangle
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
+		obj.Draw();
 		// Poll for and process events
 		glfwPollEvents();
 
@@ -131,7 +137,7 @@ int main()
 		ImGui::NewFrame();
 
 		ImGui::Begin("Hello, world!");
-		ImGui::SetWindowSize(ImVec2(IMGUI_RESOLUTION));
+		ImGui::SetWindowSize(ImVec2(480, 270));
 		ImGui::Text("This is some useful text.");
 		// a slider for changing the rotation angle
 		ImGui::SliderFloat("angle", &angle, -179.0f, 179.0f);

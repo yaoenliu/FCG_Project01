@@ -22,6 +22,9 @@
     <Filter Include="ImGui\backends">
       <UniqueIdentifier>{7fb76b02-b017-46fd-b841-8a5ce68580f8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{d51ebedf-6634-4ffd-9236-0ac3c99734ed}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -50,6 +53,9 @@
     </ClCompile>
     <ClCompile Include="..\imgui-1.90.4\backends\imgui_impl_opengl3.cpp">
       <Filter>ImGui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LoadShaders\LoadShaders.cpp">
+      <Filter>來源檔案</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -84,6 +90,15 @@
     </ClInclude>
     <ClInclude Include="..\imgui-1.90.4\backends\imgui_impl_opengl3.h">
       <Filter>ImGui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LoadShaders\LoadShaders.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="GLID.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
