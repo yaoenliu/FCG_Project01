@@ -18,6 +18,7 @@ glm::mat4 rotation;
 glm::mat4 proj;
 glm::mat4 view;
 glm::vec4 color;
+
 ShaderInfo shaders[] = {
 	{GL_VERTEX_SHADER, "vertexShader.glsl"},
 	{GL_FRAGMENT_SHADER, "fragmentShader.glsl"},
@@ -69,25 +70,26 @@ int main()
 		 0.0f,  0.5f, 0.0f  // top
 	};
 
-	unsigned int VBO, VAO;
+	// unsigned int VBO, VAO;
 
 	// Generate the vertex array object
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
+	//glGenVertexArrays(1, &VAO);
+	//glBindVertexArray(VAO);
 
 	// Generate the vertex buffer object
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	//glGenBuffers(1, &VBO);
+	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 	// Set the vertex attributes
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	//glEnableVertexAttribArray(0);
 
 	GLuint shaderProgram = LoadShaders(shaders);
 
 	Object obj;
 	obj.Init(shaderProgram);
+
 	obj.pushVertex(glm::vec3(-0.5f, -0.5f, 0.0f));
 	obj.pushVertex(glm::vec3(0.5f, -0.5f, 0.0f));
 	obj.pushVertex(glm::vec3(0.0f, 0.5f, 0.0f));
@@ -117,16 +119,10 @@ int main()
 		// Render here
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		// rotation
-		GLint rotationLoc = glGetUniformLocation(shaderProgram, "rotation");
-		glUniformMatrix4fv(rotationLoc, 1, GL_FALSE, &rotation[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "proj"), 1, GL_FALSE, &proj[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
 		glUniform4fv(glGetUniformLocation(shaderProgram, "ourColor"), 1, &color[0]);
 
-
-		// Draw the triangle
-		//glDrawArrays(GL_TRIANGLES, 0, 3);
 		obj.Draw();
 		// Poll for and process events
 		glfwPollEvents();

@@ -13,6 +13,7 @@ private:
 	std::vector<glm::vec3> vertices;
 	glm::vec3 translation;
 	glm::fquat rotation;
+	glm::mat4 mRotation;
 	glm::vec3 scale;
 	std::vector<Object*> childrens;
 
@@ -30,6 +31,7 @@ Object::Object()
 	translation = glm::vec3(0.0f, 0.0f, 0.0f);
 	rotation = glm::fquat(1.0f, 0.0f, 0.0f, 0.0f);
 	scale = glm::vec3(1.0f, 1.0f, 1.0f);
+	mRotation = glm::mat4(1.0f);
 }
 
 Object::~Object()
@@ -42,6 +44,7 @@ void Object::Init(GLuint shaderProgram)
 	glGenVertexArrays(1, &ID.VAO);
 	glBindVertexArray(ID.VAO);
 	glGenBuffers(1, &ID.V_VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, ID.V_VBO);
 	glGenBuffers(1, &ID.C_VBO);
 	glGenBuffers(1, &ID.EBO);
 	glGenTextures(1, &ID.Texture);
@@ -58,5 +61,8 @@ void Object::Draw()
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+
+	GLint rotationLoc = glGetUniformLocation(ID.ShaderProgram, "rotation");
+	glUniformMatrix4fv(rotationLoc, 1, GL_FALSE, &mRotation[0][0]);
 	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 }
