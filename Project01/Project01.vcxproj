@@ -105,7 +105,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)glad\include\;$(SolutionDir)glfw-3.4.bin.WIN64\include;$(SolutionDir)glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)glad\include\;$(SolutionDir)glfw-3.4.bin.WIN64\include;$(SolutionDir)glm;$(SolutionDir)imgui-1.90.4;$(SolutionDir)LoadShaders;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,11 +132,32 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\glad\src\glad.c" />
+    <ClCompile Include="..\imgui-1.90.4\backends\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\imgui-1.90.4\backends\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\imgui-1.90.4\imgui.cpp" />
+    <ClCompile Include="..\imgui-1.90.4\imgui_demo.cpp" />
+    <ClCompile Include="..\imgui-1.90.4\imgui_draw.cpp" />
+    <ClCompile Include="..\imgui-1.90.4\imgui_tables.cpp" />
+    <ClCompile Include="..\imgui-1.90.4\imgui_widgets.cpp" />
+    <ClCompile Include="..\LoadShaders\LoadShaders.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FragmentShader.glsl" />
     <None Include="VertexShader.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\imgui-1.90.4\backends\imgui_impl_glfw.h" />
+    <ClInclude Include="..\imgui-1.90.4\backends\imgui_impl_opengl3.h" />
+    <ClInclude Include="..\imgui-1.90.4\imconfig.h" />
+    <ClInclude Include="..\imgui-1.90.4\imgui.h" />
+    <ClInclude Include="..\imgui-1.90.4\imgui_internal.h" />
+    <ClInclude Include="..\imgui-1.90.4\imstb_rectpack.h" />
+    <ClInclude Include="..\imgui-1.90.4\imstb_textedit.h" />
+    <ClInclude Include="..\imgui-1.90.4\imstb_truetype.h" />
+    <ClInclude Include="..\LoadShaders\LoadShaders.h" />
+    <ClInclude Include="GLID.h" />
+    <ClInclude Include="Object.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
