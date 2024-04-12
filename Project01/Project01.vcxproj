@@ -156,6 +156,7 @@
     <ClInclude Include="..\imgui-1.90.4\imstb_textedit.h" />
     <ClInclude Include="..\imgui-1.90.4\imstb_truetype.h" />
     <ClInclude Include="..\LoadShaders\LoadShaders.h" />
+    <ClInclude Include="animetor.h" />
     <ClInclude Include="GLID.h" />
     <ClInclude Include="Object.h" />
   </ItemGroup>
