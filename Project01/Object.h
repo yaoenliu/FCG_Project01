@@ -15,7 +15,7 @@ private:
 	glm::fquat rotation;
 	glm::mat4 mRotation;
 	glm::vec3 scale;
-	std::vector<Object*> childrens;
+	
 
 public:
 	Object();
@@ -24,6 +24,7 @@ public:
 	void AddChild(Object* child);
 	void pushVertex(glm::vec3 vertex);
 	void Init(GLuint shaderProgram);
+	std::vector<Object*> childrens;
 };
 
 Object::Object()

@@ -11,21 +11,22 @@
 #include <fstream>
 #include <string>
 
+// Function prototypes here
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
-glm::mat4 rotation;
+// camera and color variables
 glm::mat4 proj;
 glm::mat4 view;
 glm::vec4 color;
+float angle = 90.0f;
 
+// global shader info
 ShaderInfo shaders[] = {
 	{GL_VERTEX_SHADER, "vertexShader.glsl"},
 	{GL_FRAGMENT_SHADER, "fragmentShader.glsl"},
 	{GL_NONE, NULL}
 };
-
-
 
 int main()
 {
@@ -36,23 +37,27 @@ int main()
 
 	// Create a windowed mode window and its OpenGL context
 	GLFWwindow* window = glfwCreateWindow(1920, 1080, "Hello World", NULL, NULL);
+	// set up the camera
 	proj = glm::perspective(glm::radians(45.0f), 640.0f / 480.0f, 0.1f, 100.0f);
 	view = glm::lookAt(glm::vec3(0.0f, 2.0f, 3.0f), // camera position
 		glm::vec3(0.0f, 0.0f, 0.0f), // target position
 		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
-	rotation = glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+	// seed the random number generator
 	srand(time(NULL));
+
+	// set the initial color
 	color = glm::vec4(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, 1.0f);
+
+	// detect if the window wasn't created
 	if (!window)
 	{
 		glfwTerminate();
 		return -1;
 	}
 
-	// Set the key callback function
+	// Set callback function
 	glfwSetKeyCallback(window, key_callback);
-
-	// set the window resize callback function
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	// Make the window's context current
@@ -62,55 +67,29 @@ int main()
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		return -1;
 
-
-	// Draw the triangle
-	float vertices[] = {
-		-0.5f, -0.5f, 0.0f, // bottom left
-		 0.5f, -0.5f, 0.0f, // bottom right
-		 0.0f,  0.5f, 0.0f  // top
-	};
-
-	// unsigned int VBO, VAO;
-
-	// Generate the vertex array object
-	//glGenVertexArrays(1, &VAO);
-	//glBindVertexArray(VAO);
-
-	// Generate the vertex buffer object
-	//glGenBuffers(1, &VBO);
-	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	// Set the vertex attributes
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	//glEnableVertexAttribArray(0);
-
+	// Set the shader program
 	GLuint shaderProgram = LoadShaders(shaders);
-
-	Object obj;
-	obj.Init(shaderProgram);
-
-	obj.pushVertex(glm::vec3(-0.5f, -0.5f, 0.0f));
-	obj.pushVertex(glm::vec3(0.5f, -0.5f, 0.0f));
-	obj.pushVertex(glm::vec3(0.0f, 0.5f, 0.0f));
-	
-
 	// Use the shader program
 	glUseProgram(shaderProgram);
 
+	// Create an object (triangle)
+	Object obj;
+	obj.Init(shaderProgram);
+	obj.pushVertex(glm::vec3(-0.5f, -0.5f, 0.0f));
+	obj.pushVertex(glm::vec3(0.5f, -0.5f, 0.0f));
+	obj.pushVertex(glm::vec3(0.0f, 0.5f, 0.0f));
 
 	// setup imgui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-
 	ImGui::StyleColorsDark();
-
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	// Setup Platform/Renderer bindings
 	ImGui_ImplOpenGL3_Init("#version 330");
 
-	float angle = 90.0f;
+
 
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(window))
@@ -156,11 +135,7 @@ int main()
 		{
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
 		}
-
 		ImGui::End();
-
-
-
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -188,4 +163,5 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 	proj = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
 }
+
 
