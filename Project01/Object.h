@@ -10,60 +10,97 @@ class Object
 private:
 	GLID ID;
 
-	std::vector<glm::vec3> vertices;
+	int EBOSize;
+
 	glm::vec3 translation;
 	glm::fquat rotation;
-	glm::mat4 mRotation;
 	glm::vec3 scale;
-	
+	glm::mat4 model;
 
 public:
+	std::vector<Object*> childrens;
 	Object();
 	~Object();
-	void Draw();
+	void Init(GLuint shaderProgram, std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& colors, std::vector<unsigned>& indice);
 	void AddChild(Object* child);
-	void pushVertex(glm::vec3 vertex);
-	void Init(GLuint shaderProgram);
-	std::vector<Object*> childrens;
+	void setTranslate(glm::vec3 translation);
+	void setRotation(glm::vec3 rotation);
+	void Draw(glm::mat4 parentModel);
 };
 
 Object::Object()
 {
+	EBOSize = 0;
 	translation = glm::vec3(0.0f, 0.0f, 0.0f);
 	rotation = glm::fquat(1.0f, 0.0f, 0.0f, 0.0f);
 	scale = glm::vec3(1.0f, 1.0f, 1.0f);
-	mRotation = glm::mat4(1.0f);
+	model = glm::mat4(1.0f);
 }
 
 Object::~Object()
 {
 }
 
-void Object::Init(GLuint shaderProgram)
+void Object::Init(GLuint shaderProgram, std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& colors, std::vector<unsigned>& indice)
 {
-	ID.ShaderProgram = shaderProgram;
+	EBOSize = indice.size();
+	// Create and bind VAO
 	glGenVertexArrays(1, &ID.VAO);
 	glBindVertexArray(ID.VAO);
+
 	glGenBuffers(1, &ID.V_VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, ID.V_VBO);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), &vertices[0], GL_STATIC_DRAW);
+
 	glGenBuffers(1, &ID.C_VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, ID.C_VBO);
+	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(colors[0]), &colors[0], GL_STATIC_DRAW);
+
 	glGenBuffers(1, &ID.EBO);
-	glGenTextures(1, &ID.Texture);
-	glGenBuffers(1, &ID.TextureBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ID.EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indice.size() * sizeof(indice[0]), &indice[0], GL_STATIC_DRAW);
 }
 
-void Object::pushVertex(glm::vec3 vertex)
+void Object::AddChild(Object* child)
 {
-	vertices.push_back(vertex);
+	childrens.push_back(child);
 }
 
-void Object::Draw()
+void Object::setTranslate(glm::vec3 translation)
 {
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	this->translation = translation;
+}
+
+void Object::setRotation(glm::vec3 rotation)
+{
+	this->rotation = rotation;
+}
+
+void Object::Draw(glm::mat4 parentModel = glm::mat4(1.0f))
+{
+	//// Use the shader
+	//glUseProgram(ID.ShaderProgram);
+
+	// get this obj's model matrix
+	model = parentModel * glm::translate(glm::mat4(1.0f), translation) * glm::mat4_cast(rotation) * glm::scale(glm::mat4(1.0f), scale);
+
+	// put matrix
+	glUniformMatrix4fv(glGetUniformLocation(ID.ShaderProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
+
+	// Enable 'position' and 'color' attribute and assign data
 	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
 
-	GLint rotationLoc = glGetUniformLocation(ID.ShaderProgram, "rotation");
-	glUniformMatrix4fv(rotationLoc, 1, GL_FALSE, &mRotation[0][0]);
-	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+	glBindBuffer(GL_ARRAY_BUFFER, ID.V_VBO);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glBindBuffer(GL_ARRAY_BUFFER, ID.C_VBO);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	// Draw triangles
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ID.EBO);
+	glDrawElements(GL_TRIANGLES, EBOSize, GL_UNSIGNED_INT, 0);
+
+	// Draw children
+	for (int i = 0; i < childrens.size(); i++)
+		childrens[i]->Draw(model);
 }

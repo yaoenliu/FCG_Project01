@@ -11,7 +11,8 @@
 #include <fstream>
 #include <string>
 
-// Function prototypes here
+#include <bitset>
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
@@ -27,6 +28,34 @@ ShaderInfo shaders[] = {
 	{GL_FRAGMENT_SHADER, "fragmentShader.glsl"},
 	{GL_NONE, NULL}
 };
+
+void setCube(glm::vec3 pos, float width, float height, float depth, std::vector<glm::vec3>& vertices, std::vector<unsigned>& indice)
+{
+	int pointAmount = 8;
+	vertices.assign(pointAmount, { width, height, depth });
+	for (int i = 0; i < pointAmount; i++)
+	{
+		std::string bin = std::bitset<3>(i).to_string();
+		vertices[i].x = pos.x + vertices[i].x * (bin[0] - '0');
+		vertices[i].y = pos.y - vertices[i].y * (bin[1] - '0');
+		vertices[i].z = pos.z + vertices[i].z * (bin[2] - '0');
+	}
+
+	indice = {
+		0,1,2,
+		3,2,1,
+		6,5,4,
+		5,6,7,
+		5,3,1,
+		3,5,7,
+		0,2,4,
+		6,4,2,
+		2,3,6,
+		7,6,3,
+		1,0,4,
+		4,5,1
+	};
+}
 
 int main()
 {
@@ -72,12 +101,28 @@ int main()
 	// Use the shader program
 	glUseProgram(shaderProgram);
 
-	// Create an object (triangle)
-	Object obj;
-	obj.Init(shaderProgram);
-	obj.pushVertex(glm::vec3(-0.5f, -0.5f, 0.0f));
-	obj.pushVertex(glm::vec3(0.5f, -0.5f, 0.0f));
-	obj.pushVertex(glm::vec3(0.0f, 0.5f, 0.0f));
+	std::vector<glm::vec3> vertices, colors(8, glm::vec3(0.5f, 0.5f, 0.5f));
+	std::vector<unsigned> indice;
+
+	setCube(glm::vec3(-0.25f, 0.0f, -0.25), 0.5f, 1.0f, 0.5f, vertices, indice);
+
+	Object *hand = new Object(), * obj = new Object(), * cur = hand;
+	cur->Init(shaderProgram, vertices, colors, indice);
+
+	obj->Init(shaderProgram, vertices, colors, indice);
+	obj->setTranslate(glm::vec3(0.0f, -1.0f, 0.0f));
+	cur->childrens.push_back(obj);
+	cur = obj;
+
+	for (int i = 0; i < 3; i++)
+	{
+		setCube(glm::vec3(-0.05f, 0.0f, -0.05), 0.1f, 0.2f, 0.1f, vertices, indice);
+		obj = new Object();
+		obj->Init(shaderProgram, vertices, colors, indice);
+		obj->setTranslate(glm::vec3(-0.25f, -1.0f, 0.25f - 0.05 - 0.2 * i));
+		cur->childrens.push_back(obj);
+	}
+
 
 	// setup imgui
 	IMGUI_CHECKVERSION();
@@ -98,11 +143,11 @@ int main()
 		// Render here
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "proj"), 1, GL_FALSE, &proj[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
-		glUniform4fv(glGetUniformLocation(shaderProgram, "ourColor"), 1, &color[0]);
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "lookMatrix"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projectMatrix"), 1, GL_FALSE, glm::value_ptr(proj));
 
-		obj.Draw();
+		obj->Draw(glm::mat4(1));
+
 		// Poll for and process events
 		glfwPollEvents();
 
