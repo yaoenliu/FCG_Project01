@@ -105,13 +105,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)glad\include\;$(SolutionDir)glfw-3.4.bin.WIN64\include;$(SolutionDir)glm;$(SolutionDir)imgui-1.90.4;$(SolutionDir)LoadShaders;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)glad\include\;$(SolutionDir)glfw-3.4.bin.WIN64\include;$(SolutionDir)glm;$(SolutionDir)imgui-1.90.4;$(SolutionDir)LoadShaders;$(SolutionDir)assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;assimp-vc143-mtd.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)assimp;$(SolutionDir)glfw-3.4.bin.WIN64\lib-vc2022;$(SolutionDir)GL;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)assimp;$(SolutionDir)glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -144,6 +144,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="FragmentShader.glsl" />
+    <None Include="RobotFragmentShader.glsl" />
+    <None Include="RobotVertexShader.glsl" />
     <None Include="VertexShader.glsl" />
   </ItemGroup>
   <ItemGroup>
@@ -157,7 +159,11 @@
     <ClInclude Include="..\imgui-1.90.4\imstb_truetype.h" />
     <ClInclude Include="..\LoadShaders\LoadShaders.h" />
     <ClInclude Include="GLID.h" />
+    <ClInclude Include="mesh.hpp" />
+    <ClInclude Include="model.hpp" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="shader.hpp" />
+    <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

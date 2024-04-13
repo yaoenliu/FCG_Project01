@@ -10,6 +10,10 @@
 #include "Object.h"
 #include <fstream>
 #include <string>
+#include "shader.hpp"
+#include "model.hpp"
+#include "stb_image.h"
+
 
 // Function prototypes here
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -27,7 +31,7 @@ glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 float speed = 0.1f;
 float horizontal_angle = 0;
 float vertical_angle = 0;
-float distance = 3.0f;
+float dist = 3.0f;
 
 bool keyS[4] = { false, false, false, false };
 bool mouseS[2] = { false, false };
@@ -83,18 +87,31 @@ int main()
 		return -1;
 
 	// Set the shader program
-	GLuint shaderProgram = LoadShaders(shaders);
+	//GLuint shaderProgram = LoadShaders(shaders);
 	// Use the shader program
-	glUseProgram(shaderProgram);
+	//glUseProgram(shaderProgram);
 
 	// Create an object (triangle)
-	Object obj;
-	obj.Init(shaderProgram);
-	obj.pushVertex(glm::vec3(-0.5f, -0.5f, 0.0f));
-	obj.pushVertex(glm::vec3(0.5f, -0.5f, 0.0f));
-	obj.pushVertex(glm::vec3(0.0f, 0.5f, 0.0f));
+	//Object obj;
+	//obj.Init(shaderProgram);
+	//obj.pushVertex(glm::vec3(-0.5f, -0.5f, 0.0f));
+	//obj.pushVertex(glm::vec3(0.5f, -0.5f, 0.0f));
+	//obj.pushVertex(glm::vec3(0.0f, 0.5f, 0.0f));
 
-	obj.setPosition(position);
+	//obj.setPosition(position);
+
+
+	// tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
+	stbi_set_flip_vertically_on_load(true);
+
+	// configure global opengl state
+	// -----------------------------
+	glEnable(GL_DEPTH_TEST);
+	Shader ourShader("RobotVertexShader.glsl", "RobotFragmentShader.glsl");
+
+	// load models
+	// -----------
+	Model ourModel("IronMan.obj");
 
 
 	// setup imgui
@@ -114,13 +131,34 @@ int main()
 		cameaMove();
 
 		// Render here
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClearColor(1.0, 1.0, 0.6, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "proj"), 1, GL_FALSE, &proj[0][0]);
+		/*glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "proj"), 1, GL_FALSE, &proj[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
 		glUniform4fv(glGetUniformLocation(shaderProgram, "ourColor"), 1, &color[0]);
 
-		obj.Draw();
+		obj.Draw();*/
+
+		// don't forget to enable shader before setting uniforms
+		ourShader.use();
+
+		// view/projection transformations
+		ourShader.setMat4("projection", proj);
+		ourShader.setMat4("view", view);
+
+		// render the loaded model
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+		ourShader.setMat4("model", model);
+		ourModel.Draw(ourShader);
+
+		ourShader.setVec3("viewPos", position);
+		ourShader.setVec3("light.position", 0, 0, 50);
+		ourShader.setVec3("light.ambient", 0.1, 0.1, 0.1);
+		ourShader.setVec3("light.diffuse", 0.8, 0.8, 0.8);
+		ourShader.setVec3("light.specular", 1, 1, 1);
 		// Poll for and process events
 		glfwPollEvents();
 
@@ -141,7 +179,7 @@ int main()
 		{
 			position = glm::vec3(0.0f, 0.0f, 0.0f);
 		}
-		obj.setPosition(position);
+		//obj.setPosition(position);
 		// Random Color Button
 		if (ImGui::Button("Random Color"))
 		{
@@ -224,7 +262,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	if (horizontal_angle < 0)horizontal_angle += 360;
 	if (vertical_angle > 89)vertical_angle = 89;
 	if (vertical_angle < -89)vertical_angle = -89;
-	cameraPos = glm::vec3(distance * cos(glm::radians(vertical_angle)) * sin(glm::radians(horizontal_angle)), distance * sin(glm::radians(vertical_angle)), distance * cos(glm::radians(vertical_angle)) * cos(glm::radians(horizontal_angle)));
+	cameraPos = glm::vec3(dist * cos(glm::radians(vertical_angle)) * sin(glm::radians(horizontal_angle)), dist * sin(glm::radians(vertical_angle)), dist * cos(glm::radians(vertical_angle)) * cos(glm::radians(horizontal_angle)));
 	view = glm::lookAt(cameraPos, // camera position
 		glm::vec3(0.0f, 0.0f, 0.0f), // target position
 		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
@@ -244,10 +282,10 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	distance -= yoffset;
-	if (distance < 1.0f)distance = 1.0f;
-	if (distance > 10.0f)distance = 10.0f;
-	cameraPos = glm::vec3(distance * cos(glm::radians(vertical_angle)) * sin(glm::radians(horizontal_angle)), distance * sin(glm::radians(vertical_angle)), distance * cos(glm::radians(vertical_angle)) * cos(glm::radians(horizontal_angle)));
+	dist -= yoffset;
+	if (dist < 1.0f)dist = 1.0f;
+	if (dist > 10.0f)dist = 10.0f;
+	cameraPos = glm::vec3(dist * cos(glm::radians(vertical_angle)) * sin(glm::radians(horizontal_angle)), dist * sin(glm::radians(vertical_angle)), dist * cos(glm::radians(vertical_angle)) * cos(glm::radians(horizontal_angle)));
 	view = glm::lookAt(cameraPos, // camera position
 		glm::vec3(0.0f, 0.0f, 0.0f), // target position
 		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
