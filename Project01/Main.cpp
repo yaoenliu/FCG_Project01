@@ -59,7 +59,7 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Robot", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -78,11 +78,18 @@ int main()
 	// Initialize GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		return -1;
+
+    // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
+    stbi_set_flip_vertically_on_load(true);
+
+    // configure global opengl state
+    // -----------------------------
+    glEnable(GL_DEPTH_TEST);
     Shader ourShader("1.model_loading.vs", "1.model_loading.fs");
 
     // load models
     // -----------
-    Model ourModel("test_maya.obj");
+    Model ourModel("IronMan.obj");
 
 
     // draw in wireframe
@@ -123,6 +130,11 @@ int main()
         ourShader.setMat4("model", model);
         ourModel.Draw(ourShader);
 
+        ourShader.setVec3("viewPos", camera.Position);
+        ourShader.setVec3("light.position", 0, 0, 50);
+        ourShader.setVec3("light.ambient", 0.1, 0.1, 0.1);
+        ourShader.setVec3("light.diffuse", 0.8, 0.8, 0.8);
+        ourShader.setVec3("light.specular", 1, 1, 1);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

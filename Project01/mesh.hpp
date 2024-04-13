@@ -32,9 +32,9 @@ struct Vertex {
 };
 
 struct Material {
-    glm::vec4 Ka;
-    glm::vec4 Kd;
-    glm::vec4 Ks;
+    glm::vec3 Ka;
+    glm::vec3 Kd;
+    glm::vec3 Ks;
 };
 
 struct Texture {
@@ -49,6 +49,7 @@ public:
     vector<Vertex>       vertices;
     vector<unsigned int> indices;
     vector<Texture>      textures;
+    Material mat;
     unsigned int VAO;
 
     // constructor
@@ -62,6 +63,15 @@ public:
         setupMesh();
     }
 
+    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, Material mat)
+    {
+        this->vertices = vertices;
+        this->indices = indices;
+        this->mat = mat;
+
+        // now that we have all the required data, set the vertex buffers and its attribute pointers.
+        setupMesh();
+    }
     // render the mesh
     void Draw(Shader& shader)
     {
@@ -76,19 +86,34 @@ public:
             // retrieve texture number (the N in diffuse_textureN)
             string number;
             string name = textures[i].type;
-            if (name == "texture_diffuse")
-                number = std::to_string(diffuseNr++);
-            else if (name == "texture_specular")
-                number = std::to_string(specularNr++); // transfer unsigned int to string
-            else if (name == "texture_normal")
-                number = std::to_string(normalNr++); // transfer unsigned int to string
-            else if (name == "texture_height")
-                number = std::to_string(heightNr++); // transfer unsigned int to string
 
+            if (name == "diffuse")
+                number = std::to_string(diffuseNr++);
+            else if (name == "specular")
+                number = std::to_string(specularNr++); // transfer unsigned int to string
+            else if (name == "normal")
+                number = std::to_string(normalNr++); // transfer unsigned int to string
+            else if (name == "height")
+                number = std::to_string(heightNr++); // transfer unsigned int to string
+            
             // now set the sampler to the correct texture unit
-            glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
+            shader.setInt(("material." + name).c_str(), i);
             // and finally bind the texture
             glBindTexture(GL_TEXTURE_2D, textures[i].id);
+        }
+
+        if (textures.size() == 0)
+        {
+            shader.setVec3("materialWithoutTexture.ambient", mat.Ka);
+            shader.setVec3("materialWithoutTexture.diffuse", mat.Kd);
+            shader.setVec3("materialWithoutTexture.specular", mat.Ks);
+            shader.setFloat("materialWithoutTexture.shininess", 128.0f);
+            shader.setBool("hasTexture", 0);
+        }
+        else
+        {
+            shader.setBool("hasTexture", 1);
+            shader.setFloat("material.shininess", 128.0f);
         }
 
         // draw mesh
