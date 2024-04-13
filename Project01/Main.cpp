@@ -16,6 +16,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 // camera and color variables
 glm::mat4 proj;
@@ -23,8 +24,10 @@ glm::mat4 view;
 glm::vec4 color;
 glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-float horizontal_angle = 90;
+float speed = 0.1f;
+float horizontal_angle = 0;
 float vertical_angle = 0;
+float distance = 3.0f;
 
 bool keyS[4] = { false, false, false, false };
 bool mouseS[2] = { false, false };
@@ -70,6 +73,7 @@ int main()
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
+	glfwSetScrollCallback(window, mouse_scroll_callback);
 
 	// Make the window's context current
 	glfwMakeContextCurrent(window);
@@ -89,6 +93,7 @@ int main()
 	obj.pushVertex(glm::vec3(-0.5f, -0.5f, 0.0f));
 	obj.pushVertex(glm::vec3(0.5f, -0.5f, 0.0f));
 	obj.pushVertex(glm::vec3(0.0f, 0.5f, 0.0f));
+
 	obj.setPosition(position);
 
 
@@ -209,17 +214,17 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	{
 		lastX = xpos;
 		lastY = ypos;
-		glfwSetWindowTitle(window, ("(" + std::to_string(xpos) + ", " + std::to_string(ypos) + ") angle ("+ std::to_string(horizontal_angle) + ", " + std::to_string(vertical_angle) + ")").c_str());
+		glfwSetWindowTitle(window, ("(" + std::to_string(xpos) + ", " + std::to_string(ypos) + ") angle (" + std::to_string(horizontal_angle) + ", " + std::to_string(vertical_angle) + ")").c_str());
 		return;
-	}	
+	}
 
-	horizontal_angle += 0.01f * (lastX - xpos);
-	vertical_angle -= 0.01f * (lastY - ypos);
+	horizontal_angle += speed * (lastX - xpos);
+	vertical_angle -= speed * (lastY - ypos);
 	if (horizontal_angle > 360)horizontal_angle -= 360;
 	if (horizontal_angle < 0)horizontal_angle += 360;
-	if (vertical_angle > 90)vertical_angle = 90;
-	if (vertical_angle < -90)vertical_angle = -90;
-	cameraPos = glm::vec3(3*cos(vertical_angle) * sin(horizontal_angle), 3 * sin(vertical_angle), 3 * cos(vertical_angle) * cos(horizontal_angle));
+	if (vertical_angle > 89)vertical_angle = 89;
+	if (vertical_angle < -89)vertical_angle = -89;
+	cameraPos = glm::vec3(distance * cos(glm::radians(vertical_angle)) * sin(glm::radians(horizontal_angle)), distance * sin(glm::radians(vertical_angle)), distance * cos(glm::radians(vertical_angle)) * cos(glm::radians(horizontal_angle)));
 	view = glm::lookAt(cameraPos, // camera position
 		glm::vec3(0.0f, 0.0f, 0.0f), // target position
 		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
@@ -235,4 +240,15 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		mouseS[0] = action == GLFW_RELEASE ? false : true;
 	if (button == GLFW_MOUSE_BUTTON_RIGHT)
 		mouseS[1] = action == GLFW_RELEASE ? false : true;
+}
+
+void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	distance -= yoffset;
+	if (distance < 1.0f)distance = 1.0f;
+	if (distance > 10.0f)distance = 10.0f;
+	cameraPos = glm::vec3(distance * cos(glm::radians(vertical_angle)) * sin(glm::radians(horizontal_angle)), distance * sin(glm::radians(vertical_angle)), distance * cos(glm::radians(vertical_angle)) * cos(glm::radians(horizontal_angle)));
+	view = glm::lookAt(cameraPos, // camera position
+		glm::vec3(0.0f, 0.0f, 0.0f), // target position
+		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
 }
