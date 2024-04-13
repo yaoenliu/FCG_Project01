@@ -1,4 +1,4 @@
-﻿#ifndef MODEL_H
+#ifndef MODEL_H
 #define MODEL_H
 #define STB_IMAGE_IMPLEMENTATION
 
@@ -84,18 +84,6 @@ private:
 
     }
 
-    Material loadMaterialWithoutTextures(aiMaterial* mat) {
-        Material result;
-        aiColor3D color;
-        mat->Get(AI_MATKEY_COLOR_AMBIENT, color);
-        result.Ka = glm::vec3(color.r, color.g, color.b);
-        mat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-        result.Kd = glm::vec3(color.r, color.g, color.b);
-        mat->Get(AI_MATKEY_COLOR_SPECULAR, color);
-        result.Ks = glm::vec3(color.r, color.g, color.b);
-        return result;
-    }
-
     Mesh processMesh(aiMesh* mesh, const aiScene* scene)
     {
         // data to fill
@@ -157,23 +145,21 @@ private:
         // process materials
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
+        Material mat;
+        aiColor3D color;
 
+        material->Get(AI_MATKEY_COLOR_AMBIENT, color);
+        mat.Ka = glm::vec4(color.r, color.g, color.b, 1.0);
+        material->Get(AI_MATKEY_COLOR_AMBIENT, color);
+        mat.Kd = glm::vec4(color.r, color.g, color.b, 1.0);
+        material->Get(AI_MATKEY_COLOR_AMBIENT, color);
+        mat.Ks = glm::vec4(color.r, color.g, color.b, 1.0);
         // we assume a convention for sampler names in the shaders. Each diffuse texture should be named
         // as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
         // Same applies to other texture as the following list summarizes:
         // diffuse: texture_diffuseN
         // specular: texture_specularN
         // normal: texture_normalN
-
-        if (material->GetTextureCount(aiTextureType_DIFFUSE) == 0 && material->GetTextureCount(aiTextureType_SPECULAR) == 0) {
-            //没有贴图，之前读取模型的material的值
-            Material colorMaterial = loadMaterialWithoutTextures(material);
-            return Mesh(vertices, indices, colorMaterial);
-        }
-        else
-        {
-
-        }
 
         // 1. diffuse maps
         vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
