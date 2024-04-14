@@ -53,6 +53,7 @@ public:
     vector<Texture>      textures;
     Material mat;
     unsigned int VAO;
+    glm::vec3 midPoint;
 
     glm::mat4 convertAiMatrixToGLM(aiMatrix4x4& from)
     {
@@ -68,10 +69,6 @@ public:
         to[2][3] = from.d3; to[3][3] = from.d4;
 
         return to;
-    }
-
-    Mesh()
-    {
     }
 
     // constructor

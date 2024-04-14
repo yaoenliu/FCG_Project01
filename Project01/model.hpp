@@ -19,6 +19,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <unordered_map>
 using namespace std;
 
 unsigned int TextureFromFile(const char* path, const string& directory, bool gamma = false);
@@ -27,21 +28,42 @@ class meshNode
 {
 public:
     vector<Mesh> meshes;
-    vector<meshNode> children;
+    vector<meshNode*> children;
+    glm::vec3 scale, translate;
+    glm::fquat rotation;
     glm::mat4 modelMatrix;
+
+    string name;
+    bool isJoint;
+    glm::vec3 center;
 
     meshNode()
     {
+        name = "";
+        isJoint = 0;
         modelMatrix = glm::mat4(1.0f);
+        translate = glm::vec3(0.0f);
+        scale = glm::vec3(1.0f);
+        rotation = glm::fquat(1.0f, 0.0f, 0.0f, 0.0f);
     }
 
     void Draw(Shader& shader, glm::mat4 parentModel = glm::mat4(1.0f))
     {
+        if (isJoint)
+        {
+            rotation = glm::angleAxis(glm::radians(10.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+        }
+        modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(center.x * scale.x, center.y * scale.y, center.z * scale.z)) *
+            glm::translate(glm::mat4(1.0f), translate) *
+            glm::mat4_cast(rotation) *
+            glm::scale(glm::mat4(1.0f), scale) *
+            glm::translate(glm::mat4(1.0f), -center);
+
         shader.setMat4("model", parentModel * modelMatrix);
         for (unsigned int i = 0; i < meshes.size(); i++)
             meshes[i].Draw(shader);
         for (int i = 0; i < children.size(); i++)
-            children[i].Draw(shader, parentModel * modelMatrix);
+            children[i]->Draw(shader, parentModel * modelMatrix);
     }
 };
 
@@ -50,9 +72,11 @@ class Model
 public:
     // model data 
     vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
-    meshNode    rootMesh;
     string directory;
     bool gammaCorrection;
+
+    meshNode*    rootMesh;
+    unordered_map<string, meshNode*> nodeMap;
 
     // constructor, expects a filepath to a 3D model.
     Model(string const& path, bool gamma = false) : gammaCorrection(gamma)
@@ -63,8 +87,8 @@ public:
     // draws the model, and thus all its meshes
     void Draw(Shader& shader)
     {
-        rootMesh.modelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(0.003, 0.003, 0.003));
-        rootMesh.Draw(shader);
+        rootMesh->scale = glm::vec3(0.1, 0.1, 0.1);
+        rootMesh->Draw(shader);
     }
 
 private:
@@ -84,26 +108,71 @@ private:
         directory = path.substr(0, path.find_last_of('/'));
 
         // process ASSIMP's root node recursively
-        processNode(scene->mRootNode, &rootMesh, scene);
-        //cout << meshes.size();
+        processNode(scene->mRootNode, scene);
+
+        // make tree
+        for (auto& [name, mnode] : nodeMap)
+        {
+            string temp = "";
+            int len = name.find_last_of(' ');
+
+            // is root
+            if (len == string::npos)
+            {
+                rootMesh = mnode;
+                len = -1;
+                temp = "";
+            }
+            else
+            {
+                // let parent get this kid
+                temp.assign(name.begin(), name.begin() + len);  // get parent name
+                nodeMap[temp]->children.push_back(mnode);
+            }
+
+            // get some data if this obj is joint
+            temp = "";
+            temp.assign(name, len + 1, name.length() - len >= 6 ? 5 : 0);   // get obj name
+            if (temp == "joint")
+            {
+                mnode->isJoint = 1;
+
+                // get the point that hightest between lowest point become center (for ball joint)
+                vector<Vertex>& meshVertex = mnode->meshes[0].vertices;
+                glm::vec3 hightest , lowest = hightest = meshVertex[0].Position;
+                for (int i = 1; i < meshVertex.size(); i++)
+                {
+                    if (meshVertex[i].Position.y > hightest.y)
+                        hightest = meshVertex[i].Position;
+                    if (meshVertex[i].Position.y < lowest.y)
+                        lowest = meshVertex[i].Position;
+                }
+
+                mnode->center = (hightest + lowest) * 0.5f;
+            }
+        }
     }
 
     // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
-    void processNode(aiNode* node, meshNode* curMesh, const aiScene* scene)
+    void processNode(aiNode* node, const aiScene* scene)
     {
+        string name(node->mName.C_Str());
+
+        nodeMap[name] = new meshNode();
+        rootMesh = nodeMap[name];
+        nodeMap[name]->name = name;
         // process each mesh located at the current node
         for (unsigned int i = 0; i < node->mNumMeshes; i++)
         {
             // the node object only contains indices to index the actual objects in the scene. 
             // the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-            curMesh->meshes.push_back(processMesh(mesh, scene));
+            nodeMap[name]->meshes.push_back(processMesh(mesh, scene));
         }
         // after we've processed all of the meshes (if any) we then recursively process each of the children nodes
         for (unsigned int i = 0; i < node->mNumChildren; i++)
         {
-            curMesh->children.push_back(meshNode());
-            processNode(node->mChildren[i], &curMesh->children[i], scene);
+            processNode(node->mChildren[i], scene);
         }
 
     }
