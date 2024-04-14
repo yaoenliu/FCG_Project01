@@ -27,10 +27,10 @@ glm::mat4 proj;
 glm::mat4 view;
 glm::vec4 color;
 glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.3f, 3.0f);
 float speed = 0.1f;
 float horizontal_angle = 0;
-float vertical_angle = 0;
+float vertical_angle = glm::degrees(asin(0.1));
 float dist = 3.0f;
 
 bool keyS[4] = { false, false, false, false };
@@ -55,8 +55,8 @@ int main()
 	GLFWwindow* window = glfwCreateWindow(1920, 1080, "Hello World", NULL, NULL);
 	// set up the camera
 	proj = glm::perspective(glm::radians(45.0f), 640.0f / 480.0f, 0.1f, 100.0f);
-	view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), // camera position
-		glm::vec3(0.0f, 0.0f, 0.0f), // target position
+	view = glm::lookAt(cameraPos, // camera position
+		glm::vec3(0.0f, 0.4f, 0.0f), // target position
 		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
 
 	// seed the random number generator
@@ -87,18 +87,20 @@ int main()
 		return -1;
 
 	// Set the shader program
-	//GLuint shaderProgram = LoadShaders(shaders);
+	GLuint shaderProgram = LoadShaders(shaders);
 	// Use the shader program
 	//glUseProgram(shaderProgram);
 
 	// Create an object (triangle)
-	//Object obj;
-	//obj.Init(shaderProgram);
-	//obj.pushVertex(glm::vec3(-0.5f, -0.5f, 0.0f));
-	//obj.pushVertex(glm::vec3(0.5f, -0.5f, 0.0f));
-	//obj.pushVertex(glm::vec3(0.0f, 0.5f, 0.0f));
-
-	//obj.setPosition(position);
+	Object obj;
+	obj.Init(shaderProgram);
+	obj.pushVertex(glm::vec3(200.0f, 0.0f, 200.0f));
+	obj.pushVertex(glm::vec3(-200.0f, 0.0f, 200.0f));
+	obj.pushVertex(glm::vec3(200.0f, 0.0f, -200.0f));
+	obj.pushVertex(glm::vec3(-200.0f, 0.0f, -200.0f));
+	obj.pushVertex(glm::vec3(200.0f, 0.0f, -200.0f));
+	obj.pushVertex(glm::vec3(-200.0f, 0.0f, 200.0f));
+	obj.setPosition(position);
 
 
 	// tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
@@ -128,17 +130,17 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 
-		cameaMove();
+		//cameaMove();
 
 		// Render here
 		glClearColor(1.0, 1.0, 0.6, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		/*glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "proj"), 1, GL_FALSE, &proj[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "proj"), 1, GL_FALSE, &proj[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
 		glUniform4fv(glGetUniformLocation(shaderProgram, "ourColor"), 1, &color[0]);
 
-		obj.Draw();*/
+		obj.Draw();
 
 		// don't forget to enable shader before setting uniforms
 		ourShader.use();
@@ -159,6 +161,12 @@ int main()
 		ourShader.setVec3("light.ambient", 0.1, 0.1, 0.1);
 		ourShader.setVec3("light.diffuse", 0.8, 0.8, 0.8);
 		ourShader.setVec3("light.specular", 1, 1, 1);
+
+		// Scene part
+		// switch back to the default shader
+		glUseProgram(shaderProgram);
+		// draw the scene
+		obj.Draw();
 		// Poll for and process events
 		glfwPollEvents();
 
@@ -240,7 +248,7 @@ void cameaMove()
 	if (keyS[3])
 		cameraPos.x += 0.1f;
 	view = glm::lookAt(cameraPos, // camera position
-		glm::vec3(0.0f, 0.0f, 0.0f), // target position
+		glm::vec3(0.0f, 0.4f, 0.0f), // target position
 		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
 }
 
@@ -258,13 +266,15 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 	horizontal_angle += speed * (lastX - xpos);
 	vertical_angle -= speed * (lastY - ypos);
+	if (sin(glm::radians(vertical_angle)) < 0.1)vertical_angle = glm::degrees(asin(0.1));
 	if (horizontal_angle > 360)horizontal_angle -= 360;
 	if (horizontal_angle < 0)horizontal_angle += 360;
 	if (vertical_angle > 89)vertical_angle = 89;
 	if (vertical_angle < -89)vertical_angle = -89;
+	
 	cameraPos = glm::vec3(dist * cos(glm::radians(vertical_angle)) * sin(glm::radians(horizontal_angle)), dist * sin(glm::radians(vertical_angle)), dist * cos(glm::radians(vertical_angle)) * cos(glm::radians(horizontal_angle)));
 	view = glm::lookAt(cameraPos, // camera position
-		glm::vec3(0.0f, 0.0f, 0.0f), // target position
+		glm::vec3(0.0f, 0.4f, 0.0f), // target position
 		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
 	// reset the last position
 
@@ -282,11 +292,11 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	dist -= yoffset;
+	dist -= 0.1 * yoffset;
 	if (dist < 1.0f)dist = 1.0f;
-	if (dist > 10.0f)dist = 10.0f;
+	if (dist > 10.0f)dist = 10.0f;	
 	cameraPos = glm::vec3(dist * cos(glm::radians(vertical_angle)) * sin(glm::radians(horizontal_angle)), dist * sin(glm::radians(vertical_angle)), dist * cos(glm::radians(vertical_angle)) * cos(glm::radians(horizontal_angle)));
 	view = glm::lookAt(cameraPos, // camera position
-		glm::vec3(0.0f, 0.0f, 0.0f), // target position
+		glm::vec3(0.0f, 0.4f, 0.0f), // target position
 		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
 }

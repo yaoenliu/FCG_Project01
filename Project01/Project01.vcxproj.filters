@@ -65,6 +65,12 @@
     <None Include="VertexShader.glsl">
       <Filter>Shader</Filter>
     </None>
+    <None Include="RobotVertexShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="RobotFragmentShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\imgui-1.90.4\imconfig.h">
@@ -99,6 +105,18 @@
     </ClInclude>
     <ClInclude Include="Object.h">
       <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="model.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="shader.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
