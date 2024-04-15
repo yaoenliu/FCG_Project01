@@ -1,4 +1,4 @@
-﻿#ifndef MESH_H
+﻿#ifndef MODEL_H
 #define MODEL_H
 #define STB_IMAGE_IMPLEMENTATION
 
@@ -7,12 +7,10 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 
-#include "mesh.hpp"
-#include "shader.hpp"
-#include "stb_image.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -20,52 +18,16 @@
 #include <map>
 #include <vector>
 #include <unordered_map>
+
+#include "mesh.hpp"
+#include "shader.hpp"
+#include "stb_image.h"
+#include "meshNode.h"
+
 using namespace std;
 
 unsigned int TextureFromFile(const char* path, const string& directory, bool gamma = false);
 
-class meshNode
-{
-public:
-    vector<Mesh> meshes;
-    vector<meshNode*> children;
-    glm::vec3 scale, translate;
-    glm::fquat rotation;
-    glm::mat4 modelMatrix;
-
-    string name;
-    bool isJoint;
-    glm::vec3 center;
-
-    meshNode()
-    {
-        name = "";
-        isJoint = 0;
-        modelMatrix = glm::mat4(1.0f);
-        translate = glm::vec3(0.0f);
-        scale = glm::vec3(1.0f);
-        rotation = glm::fquat(1.0f, 0.0f, 0.0f, 0.0f);
-    }
-
-    void Draw(Shader& shader, glm::mat4 parentModel = glm::mat4(1.0f))
-    {
-        if (isJoint)
-        {
-            rotation = glm::angleAxis(glm::radians(10.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-        }
-        modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(center.x * scale.x, center.y * scale.y, center.z * scale.z)) *
-            glm::translate(glm::mat4(1.0f), translate) *
-            glm::mat4_cast(rotation) *
-            glm::scale(glm::mat4(1.0f), scale) *
-            glm::translate(glm::mat4(1.0f), -center);
-
-        shader.setMat4("model", parentModel * modelMatrix);
-        for (unsigned int i = 0; i < meshes.size(); i++)
-            meshes[i].Draw(shader);
-        for (int i = 0; i < children.size(); i++)
-            children[i]->Draw(shader, parentModel * modelMatrix);
-    }
-};
 
 class Model
 {
@@ -87,7 +49,6 @@ public:
     // draws the model, and thus all its meshes
     void Draw(Shader& shader)
     {
-        rootMesh->scale = glm::vec3(0.1, 0.1, 0.1);
         rootMesh->Draw(shader);
     }
 

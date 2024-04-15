@@ -141,7 +141,10 @@
     <ClCompile Include="..\imgui-1.90.4\imgui_tables.cpp" />
     <ClCompile Include="..\imgui-1.90.4\imgui_widgets.cpp" />
     <ClCompile Include="..\LoadShaders\LoadShaders.cpp" />
+    <ClCompile Include="animator.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="meshNode.cpp" />
+    <ClCompile Include="modelState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FragmentShader.glsl" />
@@ -159,9 +162,12 @@
     <ClInclude Include="..\imgui-1.90.4\imstb_textedit.h" />
     <ClInclude Include="..\imgui-1.90.4\imstb_truetype.h" />
     <ClInclude Include="..\LoadShaders\LoadShaders.h" />
+    <ClInclude Include="animator.h" />
     <ClInclude Include="GLID.h" />
     <ClInclude Include="mesh.hpp" />
+    <ClInclude Include="meshNode.h" />
     <ClInclude Include="model.hpp" />
+    <ClInclude Include="modelState.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="stb_image.h" />

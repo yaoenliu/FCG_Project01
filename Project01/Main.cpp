@@ -13,6 +13,7 @@
 #include "shader.hpp"
 #include "model.hpp"
 #include "stb_image.h"
+#include "animator.h"
 
 
 // Function prototypes here
@@ -113,10 +114,42 @@ int main()
 
 	// load models
 	// -----------
-	Model ourModel("IronMan.obj");
+	Model ourModel("robot.obj");
+	ourModel.rootMesh->scale = glm::vec3(0.1, 0.1, 0.1);
 
+	// make animation
+	// -----------
+	animation ourAnimation(5.5);
+	animator ourAnimator(ourModel, ourShader);
+	modelState state = ourModel.rootMesh->getModelState();
+
+	ourAnimation.keyFrames.push_back(keyFrame(state, 0));
+	state.rotation = glm::angleAxis(glm::radians(120.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+	ourAnimation.keyFrames.push_back(keyFrame(state, 1));
+	state.rotation = glm::angleAxis(glm::radians(240.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+	ourAnimation.keyFrames.push_back(keyFrame(state, 2));
+	state.rotation = glm::fquat(1, 0, 0, 0);
+	ourAnimation.keyFrames.push_back(keyFrame(state, 3));
+
+	state.translation = glm::vec3(0, 10, 0);
+	state.children[0].children[1].rotation = glm::angleAxis(glm::radians(175.0f), glm::vec3(0.0f, 0.0f, -1.0f));	// rArm
+	state.children[0].children[1].children[0].children[0].rotation = glm::angleAxis(glm::radians(30.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+	state.children[0].children[2].rotation = glm::angleAxis(glm::radians(175.0f), glm::vec3(0.0f, 0.0f, 1.0f));	// lArm
+	state.children[0].children[2].children[0].children[0].rotation = glm::angleAxis(glm::radians(30.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ourAnimation.keyFrames.push_back(keyFrame(state, 5));
+	state.translation = glm::vec3(0, 0, 0);
+	state.children[0].children[1].rotation = glm::fquat(1, 0, 0, 0);	// rArm
+	state.children[0].children[1].children[0].children[0].rotation = glm::fquat(1, 0, 0, 0);
+	state.children[0].children[2].rotation = glm::fquat(1, 0, 0, 0);	// lArm
+	state.children[0].children[2].children[0].children[0].rotation = glm::fquat(1, 0, 0, 0);
+	ourAnimation.keyFrames.push_back(keyFrame(state, 5.5));
+
+	ourAnimator.animations.push_back(ourAnimation);
+	ourAnimator.loopThis = 1;
+	ourAnimator.play = 1;
 
 	// setup imgui
+	// -----------
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -150,11 +183,10 @@ int main()
 		ourShader.setMat4("view", view);
 
 		// render the loaded model
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
-		ourShader.setMat4("model", model);
-		ourModel.Draw(ourShader);
+		//modelState curState = ourAnimation.update((float)glfwGetTime());
+		//ourModel.rootMesh->loadModelState(curState);
+		//ourModel.Draw(ourShader);
+		ourAnimator.update((float)glfwGetTime());
 
 		ourShader.setVec3("viewPos", position);
 		ourShader.setVec3("light.position", 0, 0, 50);
