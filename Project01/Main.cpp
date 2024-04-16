@@ -13,7 +13,7 @@
 #include "shader.hpp"
 #include "model.hpp"
 #include "stb_image.h"
-#include "animator.h"
+#include "Animation\Animator.h"
 
 
 // Function prototypes here
@@ -119,8 +119,8 @@ int main()
 
 	// make animation
 	// -----------
-	animation ourAnimation(5.5);
-	animator ourAnimator(ourModel, ourShader);
+	Animation ourAnimation(5.5);
+	Animator ourAnimator(ourModel, ourShader);
 	modelState state = ourModel.rootMesh->getModelState();
 
 	ourAnimation.keyFrames.push_back(keyFrame(state, 0));

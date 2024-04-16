@@ -1,0 +1,96 @@
+#pragma once
+
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/quaternion.hpp>
+
+#include "model.hpp"
+#include "modelState.h"
+
+#include "Animation.h"
+
+
+
+
+class Animator
+{
+private:
+    Model model;
+    Shader shader;
+    int curIndex;
+    float playTime, lastUpdate;
+
+public:
+    vector<Animation> animations;
+    bool loopAll, loopThis, play;
+
+    Animator(Model& model, Shader& shader) : model(model), shader(shader)
+    {
+        lastUpdate = 0;
+        playTime = 0;
+        curIndex = 0;
+        play = 0;
+        loopAll = 1;
+        loopThis = 0;
+    }
+
+    void update(float curTime)
+    {
+        if (animations.empty())
+            return;
+        if (!play)
+        {
+            lastUpdate = curTime;
+            return;
+        }
+
+        float deltaTime = curTime - lastUpdate;
+        if (deltaTime < 0)                      // open windows too long
+        {
+            lastUpdate = curTime;
+            return;
+        }
+        playTime += deltaTime;
+
+        Animation& curAnimation = animations[curIndex];
+        if (playTime > curAnimation.duration)   // next animation
+        {
+            playTime = 0;
+            if (!loopThis)
+                curIndex++;
+        }
+        if (curIndex >= animations.size())      // out of stack
+        {
+            playTime = 0;
+            if (loopAll)
+            {
+                curIndex = 0;
+            }
+            else
+            {
+                curIndex = 0;
+                play = 0;
+                return;
+            }
+        }
+
+        // render it
+        modelState curState = curAnimation.update(playTime);
+        model.rootMesh->loadModelState(curState);
+        model.Draw(shader);
+
+        lastUpdate = curTime;
+    }
+
+    void next()
+    {
+        curIndex++;
+    }
+
+    void replay()
+    {
+        curIndex = 0;
+        playTime = 0;
+    }
+};
+
