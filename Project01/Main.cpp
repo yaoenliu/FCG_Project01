@@ -11,7 +11,7 @@
 #include <fstream>
 #include <string>
 #include "shader.hpp"
-#include "model.hpp"
+#include "model.h"
 #include "stb_image.h"
 #include "Animation\Animator.h"
 
@@ -24,19 +24,21 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 // camera and color variables
-glm::mat4 proj;
-glm::mat4 view;
-glm::vec4 color;
-glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.3f, 3.0f);
-float speed = 0.1f;
-float horizontal_angle = 0;
-float vertical_angle = glm::degrees(asin(0.1));
-float dist = 3.0f;
+glm::mat4 proj; // projection matrix
+glm::mat4 view; // view matrix
+glm::vec4 color; // color 
+glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f); // model position
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.3f, 3.0f); // camera position
+float speed = 0.1f; // camera speed
+float horizontal_angle = 0; // camera horizontal angle
+float vertical_angle = glm::degrees(asin(0.1)); // camera vertical angle
+float dist = 3.0f; // camera distance to the target
 
-bool keyS[4] = { false, false, false, false };
-bool mouseS[2] = { false, false };
-void cameaMove();
+bool keyS[4] = { false, false, false, false }; // W, A, S, D keys status
+bool mouseS[2] = { false, false }; // left and right mouse buttons status
+void cameaMove(); // camera movement function
+
+GLuint sceneShaderProgram; // scene shader program
 
 // global shader info
 ShaderInfo shaders[] = {
@@ -56,15 +58,13 @@ int main()
 	GLFWwindow* window = glfwCreateWindow(1920, 1080, "Hello World", NULL, NULL);
 	// set up the camera
 	proj = glm::perspective(glm::radians(45.0f), 640.0f / 480.0f, 0.1f, 100.0f);
-	view = glm::lookAt(cameraPos, // camera position
+	view = glm::lookAt(
+		cameraPos, // camera position
 		glm::vec3(0.0f, 0.4f, 0.0f), // target position
 		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
 
-	// seed the random number generator
-	srand(time(NULL));
-
 	// set the initial color
-	color = glm::vec4(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, 1.0f);
+	color = glm::vec4(105.0/255, 72.0/255, 40.0/255, 1.0f);
 
 	// detect if the window wasn't created
 	if (!window)
@@ -82,46 +82,39 @@ int main()
 
 	// Make the window's context current
 	glfwMakeContextCurrent(window);
-
 	// Initialize GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		return -1;
 
 	// Set the shader program
-	GLuint shaderProgram = LoadShaders(shaders);
-	// Use the shader program
-	//glUseProgram(shaderProgram);
-
-	// Create an object (triangle)
-	Object obj;
-	obj.Init(shaderProgram);
-	obj.pushVertex(glm::vec3(200.0f, 0.0f, 200.0f));
-	obj.pushVertex(glm::vec3(-200.0f, 0.0f, 200.0f));
-	obj.pushVertex(glm::vec3(200.0f, 0.0f, -200.0f));
-	obj.pushVertex(glm::vec3(-200.0f, 0.0f, -200.0f));
-	obj.pushVertex(glm::vec3(200.0f, 0.0f, -200.0f));
-	obj.pushVertex(glm::vec3(-200.0f, 0.0f, 200.0f));
-	obj.setPosition(position);
+	sceneShaderProgram = LoadShaders(shaders);
+	// Create the ground object
+	Object ground;
+	ground.Init(sceneShaderProgram);
+	ground.pushVertex(glm::vec3(200.0f, 0.0f, 200.0f));
+	ground.pushVertex(glm::vec3(-200.0f, 0.0f, 200.0f));
+	ground.pushVertex(glm::vec3(200.0f, 0.0f, -200.0f));
+	ground.pushVertex(glm::vec3(-200.0f, 0.0f, -200.0f));
+	ground.pushVertex(glm::vec3(200.0f, 0.0f, -200.0f));
+	ground.pushVertex(glm::vec3(-200.0f, 0.0f, 200.0f));
+	ground.setPosition(position);
 
 
 	// tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
 	stbi_set_flip_vertically_on_load(true);
 
 	// configure global opengl state
-	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
 	Shader ourShader("RobotVertexShader.glsl", "RobotFragmentShader.glsl");
 
 	// load models
-	// -----------
-	Model ourModel("robot.obj");
-	ourModel.rootMesh->scale = glm::vec3(0.1, 0.1, 0.1);
+	Model androidBot("robot.obj");
+	androidBot.setScale(0.1f);
 
 	// make animation
-	// -----------
 	Animation ourAnimation(5.5);
-	Animator ourAnimator(ourModel, ourShader);
-	modelState state = ourModel.rootMesh->getModelState();
+	Animator ourAnimator(androidBot, ourShader);
+	modelState state = androidBot.rootMesh->getModelState();
 
 	ourAnimation.keyFrames.push_back(keyFrame(state, 0));
 	state.rotation = glm::angleAxis(glm::radians(120.0f), glm::vec3(0.0f, 0.0f, -1.0f));
@@ -169,23 +162,23 @@ int main()
 		glClearColor(1.0, 1.0, 0.6, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "proj"), 1, GL_FALSE, &proj[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
-		glUniform4fv(glGetUniformLocation(shaderProgram, "ourColor"), 1, &color[0]);
+		glUniformMatrix4fv(glGetUniformLocation(sceneShaderProgram, "proj"), 1, GL_FALSE, &proj[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(sceneShaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
+		glUniform4fv(glGetUniformLocation(sceneShaderProgram, "ourColor"), 1, &color[0]);
 
-		obj.Draw();
+		ground.Draw();
 
-		// don't forget to enable shader before setting uniforms
+		// switch to the model shader
 		ourShader.use();
 
-		// view/projection transformations
+		// binding the uniform matrix view and projection
 		ourShader.setMat4("projection", proj);
 		ourShader.setMat4("view", view);
 
 		// render the loaded model
 		//modelState curState = ourAnimation.update((float)glfwGetTime());
 		//ourModel.rootMesh->loadModelState(curState);
-		//ourModel.Draw(ourShader);
+		//androidBot.Draw(ourShader);
 		ourAnimator.update((float)glfwGetTime());
 
 		ourShader.setVec3("viewPos", position);
@@ -195,10 +188,10 @@ int main()
 		ourShader.setVec3("light.specular", 1, 1, 1);
 
 		// Scene part
-		// switch back to the default shader
-		glUseProgram(shaderProgram);
+		// switch back to the Scene shader
+		glUseProgram(sceneShaderProgram);
 		// draw the scene
-		obj.Draw();
+		ground.Draw();
 		// Poll for and process events
 		glfwPollEvents();
 
@@ -209,7 +202,9 @@ int main()
 
 		ImGui::Begin("Hello, world!");
 		ImGui::SetWindowSize(ImVec2(480, 270));
-
+		static float f = 0.1f;
+		ImGui::SliderFloat ("Scale", &f, 0.1f, 0.3f);
+		androidBot.setScale(f);
 
 		ImGui::ColorEdit3("color", &color[0]);
 		ImGui::SliderFloat("posx", &position.x, -10.0f, 10.0f);

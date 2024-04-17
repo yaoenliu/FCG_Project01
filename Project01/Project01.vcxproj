@@ -168,7 +168,7 @@
     <ClInclude Include="GLID.h" />
     <ClInclude Include="mesh.hpp" />
     <ClInclude Include="meshNode.h" />
-    <ClInclude Include="model.hpp" />
+    <ClInclude Include="model.h" />
     <ClInclude Include="modelState.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="shader.hpp" />

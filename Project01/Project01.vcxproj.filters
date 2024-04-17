@@ -121,7 +121,7 @@
     <ClInclude Include="mesh.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="model.hpp">
+    <ClInclude Include="model.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="shader.hpp">
