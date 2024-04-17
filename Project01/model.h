@@ -43,7 +43,8 @@ public:
 	string directory;
 	bool gammaCorrection;
 	meshNode* rootMesh;
-	unordered_map<string, meshNode*> nodeMap;
+	vector<string> joints;
+	unordered_map<string, meshNode*> jointMesh;
 
 	// constructor, expects a filepath to a 3D model.
 	Model(string const& path, bool gamma);
@@ -60,6 +61,7 @@ public:
 	
 
 private:
+	unordered_map<string, meshNode*> nodeMap;
 	// loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 	void loadModel(string const& path);
 	// processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
@@ -184,9 +186,12 @@ void Model::loadModel(string const& path)
 
 		// get some data if this obj is joint
 		temp = "";
-		temp.assign(name, len + 1, name.length() - len >= 6 ? 5 : 0);   // get obj name
-		if (temp == "joint")
+		temp.assign(name, len + 1);   // get obj name
+		if (temp.length() >= 5 && temp.substr(0, 5) == "joint")
 		{
+			temp = temp.substr(5);
+			joints.push_back(temp);
+			jointMesh[temp] = mnode;
 			mnode->isJoint = 1;
 
 			// get the point that hightest between lowest point become center (for ball joint)
