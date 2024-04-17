@@ -53,9 +53,7 @@ void Object::Init(GLuint shaderProgram)
 {
 	ID.ShaderProgram = shaderProgram;
 	glGenVertexArrays(1, &ID.VAO);
-	glBindVertexArray(ID.VAO);
 	glGenBuffers(1, &ID.V_VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, ID.V_VBO);
 	glGenBuffers(1, &ID.C_VBO);
 	glGenBuffers(1, &ID.EBO);
 	glGenTextures(1, &ID.Texture);
@@ -69,6 +67,8 @@ void Object::pushVertex(glm::vec3 vertex)
 
 void Object::Draw()
 {
+	glBindVertexArray(ID.VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, ID.V_VBO);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
