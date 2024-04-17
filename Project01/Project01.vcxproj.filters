@@ -136,12 +136,6 @@
     <ClInclude Include="modelState.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="Animation.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
-    <ClInclude Include="keyFrame.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
     <ClInclude Include="Animation\Animation.h">
       <Filter>Animation</Filter>
     </ClInclude>
