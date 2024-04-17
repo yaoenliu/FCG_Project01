@@ -109,6 +109,7 @@ int main()
 
 	// load models
 	Model androidBot("robot.obj");
+	androidBot.setShader(&ourShader);
 	androidBot.setScale(0.1f);
 
 	// make animation
@@ -137,9 +138,8 @@ int main()
 	//state.children[0].children[2].children[0].children[0].rotation = glm::fquat(1, 0, 0, 0);
 	//ourAnimation.keyFrames.push_back(keyFrame(state, 5.5));
 
-	ourAnimator.animations.push_back(ourAnimation);
-	ourAnimator.loopThis = 1;
-	ourAnimator.play = 1;
+	androidBot.animations.push_back(ourAnimation);
+	androidBot.setMode(loop);
 
 	// setup imgui
 	// -----------
@@ -178,8 +178,9 @@ int main()
 		// render the loaded model
 		//modelState curState = ourAnimation.update((float)glfwGetTime());
 		//ourModel.rootMesh->loadModelState(curState);
-		//androidBot.Draw(ourShader);
-		ourAnimator.update((float)glfwGetTime());
+		androidBot.Draw();
+
+		//ourAnimator.update((float)glfwGetTime());
 
 		ourShader.setVec3("viewPos", position);
 		ourShader.setVec3("light.position", 0, 0, 50);
@@ -204,7 +205,7 @@ int main()
 		ImGui::SetWindowSize(ImVec2(480, 270));
 		static float f = 0.1f;
 		ImGui::SliderFloat ("Scale", &f, 0.1f, 0.3f);
-		androidBot.setScale(f);
+		androidBot.rootMesh->translation = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		ImGui::ColorEdit3("color", &color[0]);
 		ImGui::SliderFloat("posx", &position.x, -10.0f, 10.0f);

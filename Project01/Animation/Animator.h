@@ -77,7 +77,7 @@ void Animator::update(float curTime)
 	// render it
 	modelState curState = curAnimation.update(playTime);
 	model->rootMesh->loadModelState(curState);
-	model->Draw(*shader);
+	model->Draw();
 
 	lastUpdate = curTime;
 }

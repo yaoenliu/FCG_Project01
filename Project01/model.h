@@ -21,8 +21,18 @@
 #include "shader.hpp"
 #include "stb_image.h"
 #include "meshNode.h"
+#include "Animation/animation.h"
 
 using namespace std;
+
+enum playMode
+{
+	once = 0,
+	loop = 1,
+	loopAll = 2,
+	stop = 3
+};
+
 unsigned int TextureFromFile(const char* path, const string& directory, bool gamma = false);
 
 class Model
@@ -37,9 +47,17 @@ public:
 
 	// constructor, expects a filepath to a 3D model.
 	Model(string const& path, bool gamma);
-	void Draw(Shader& shader);// draws the model, and thus all its meshes
+	void setShader(Shader* shader) { this->shader = shader; }
+	void Draw();// draws the model, and thus all its meshes
 	void setScale(glm::vec3 scale);// set Scale with different value for each axis
 	void setScale(float scale);	// set Scale for all axis
+
+	// animation data
+	vector<Animation> animations;
+	void setMode(int mode) { playMode = mode; }
+	int playMode = stop;
+	int animationIndex;
+	
 
 private:
 	// loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
@@ -52,18 +70,69 @@ private:
 	// checks all material textures of a given type and loads the textures if they're not loaded yet.
 	// the required info is returned as a Texture struct.
 	vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName);
+	Shader * shader;
+	// animation data
+	int curIndex;
+	float playTime, lastUpdate;	
+	void AnimatorUpdate();
 };
+
+
 
 // constructor, expects a filepath to a 3D model.
 Model::Model(string const& path, bool gamma = false) : gammaCorrection(gamma)
 {
 	loadModel(path);
 }
-
-// draws the model, and thus all its meshes
-void Model::Draw(Shader& shader)
+void Model::AnimatorUpdate()
 {
-	rootMesh->Draw(shader);
+	float curTime = glfwGetTime();
+	if (animations.empty())
+		return;
+	if (playMode==stop)
+	{
+		lastUpdate = curTime;
+		return;
+	}
+
+	float deltaTime = curTime - lastUpdate;
+	if (deltaTime < 0)                      // open windows too long
+	{
+		lastUpdate = curTime;
+		return;
+	}
+	playTime += deltaTime;
+
+	Animation& curAnimation = animations[curIndex];
+	if (playTime > curAnimation.duration)   // next animation
+	{
+		playTime = 0;
+		if (playMode==loop)
+			curIndex++;
+	}
+	if (curIndex >= animations.size())      // out of stack
+	{
+		playTime = 0;
+		if (playMode==loop)
+		{
+			curIndex = 0;
+		}
+		else
+		{
+			curIndex = 0;
+			playMode = stop;
+			return;
+		}
+	}
+	modelState state = curAnimation.update(playTime);
+	rootMesh->loadModelState(state);	
+	lastUpdate = curTime;
+}
+// draws the model, and thus all its meshes
+void Model::Draw()
+{
+	AnimatorUpdate();
+	rootMesh->Draw(*shader);
 }
 // set Scale with different value for each axis
 void Model::setScale(glm::vec3 scale)
