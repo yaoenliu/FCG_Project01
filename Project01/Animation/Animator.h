@@ -1,11 +1,11 @@
 #pragma once
-
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/quaternion.hpp>
 #include "model.h"
 #include "modelState.h"
 #include "Animation.h"
+
 
 class Animator
 {

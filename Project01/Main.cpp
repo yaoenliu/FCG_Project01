@@ -112,7 +112,7 @@ int main()
 	androidBot.setScale(0.1f);
 
 	// make animation
-	Animation ourAnimation(5.5);
+	Animation ourAnimation(3);
 	Animator ourAnimator(androidBot, ourShader);
 	modelState state = androidBot.rootMesh->getModelState();
 
@@ -124,18 +124,18 @@ int main()
 	state.rotation = glm::fquat(1, 0, 0, 0);
 	ourAnimation.keyFrames.push_back(keyFrame(state, 3));
 
-	state.translation = glm::vec3(0, 10, 0);
-	state.children[0].children[1].rotation = glm::angleAxis(glm::radians(175.0f), glm::vec3(0.0f, 0.0f, -1.0f));	// rArm
-	state.children[0].children[1].children[0].children[0].rotation = glm::angleAxis(glm::radians(30.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-	state.children[0].children[2].rotation = glm::angleAxis(glm::radians(175.0f), glm::vec3(0.0f, 0.0f, 1.0f));	// lArm
-	state.children[0].children[2].children[0].children[0].rotation = glm::angleAxis(glm::radians(30.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ourAnimation.keyFrames.push_back(keyFrame(state, 5));
-	state.translation = glm::vec3(0, 0, 0);
-	state.children[0].children[1].rotation = glm::fquat(1, 0, 0, 0);	// rArm
-	state.children[0].children[1].children[0].children[0].rotation = glm::fquat(1, 0, 0, 0);
-	state.children[0].children[2].rotation = glm::fquat(1, 0, 0, 0);	// lArm
-	state.children[0].children[2].children[0].children[0].rotation = glm::fquat(1, 0, 0, 0);
-	ourAnimation.keyFrames.push_back(keyFrame(state, 5.5));
+	//state.translation = glm::vec3(0, 10, 0);
+	//state.children[0].children[1].rotation = glm::angleAxis(glm::radians(175.0f), glm::vec3(0.0f, 0.0f, -1.0f));	// rArm
+	//state.children[0].children[1].children[0].children[0].rotation = glm::angleAxis(glm::radians(30.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+	//state.children[0].children[2].rotation = glm::angleAxis(glm::radians(175.0f), glm::vec3(0.0f, 0.0f, 1.0f));	// lArm
+	//state.children[0].children[2].children[0].children[0].rotation = glm::angleAxis(glm::radians(30.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	//ourAnimation.keyFrames.push_back(keyFrame(state, 5));
+	//state.translation = glm::vec3(0, 0, 0);
+	//state.children[0].children[1].rotation = glm::fquat(1, 0, 0, 0);	// rArm
+	//state.children[0].children[1].children[0].children[0].rotation = glm::fquat(1, 0, 0, 0);
+	//state.children[0].children[2].rotation = glm::fquat(1, 0, 0, 0);	// lArm
+	//state.children[0].children[2].children[0].children[0].rotation = glm::fquat(1, 0, 0, 0);
+	//ourAnimation.keyFrames.push_back(keyFrame(state, 5.5));
 
 	ourAnimator.animations.push_back(ourAnimation);
 	ourAnimator.loopThis = 1;

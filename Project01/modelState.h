@@ -3,10 +3,7 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/quaternion.hpp>
-
 #include <vector>
-
-//#include "model.hpp"
 
 class modelState
 {
@@ -15,7 +12,6 @@ public:
 	glm::vec3 scale;
 	glm::fquat rotation;
 	glm::vec3 translation;
-
 	std::vector<modelState> children;
 
 	modelState()
