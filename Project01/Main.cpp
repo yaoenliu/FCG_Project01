@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "SOIL.h"
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
@@ -22,6 +23,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+GLuint loadCubemap(vector<const GLchar*> faces);
 
 // camera and color variables
 glm::mat4 proj; // projection matrix
@@ -42,11 +44,57 @@ GLuint sceneShaderProgram; // scene shader program
 
 int selectedJoint = 0;
 
+
 // global shader info
 ShaderInfo shaders[] = {
 	{GL_VERTEX_SHADER, "vertexShader.glsl"},
 	{GL_FRAGMENT_SHADER, "fragmentShader.glsl"},
 	{GL_NONE, NULL}
+};
+
+float skyboxVertices[] = {
+	// positions          
+-1.0f,  1.0f, -1.0f,
+-1.0f, -1.0f, -1.0f,
+ 1.0f, -1.0f, -1.0f,
+ 1.0f, -1.0f, -1.0f,
+ 1.0f,  1.0f, -1.0f,
+-1.0f,  1.0f, -1.0f,
+
+-1.0f, -1.0f,  1.0f,
+-1.0f, -1.0f, -1.0f,
+-1.0f,  1.0f, -1.0f,
+-1.0f,  1.0f, -1.0f,
+-1.0f,  1.0f,  1.0f,
+-1.0f, -1.0f,  1.0f,
+
+ 1.0f, -1.0f, -1.0f,
+ 1.0f, -1.0f,  1.0f,
+ 1.0f,  1.0f,  1.0f,
+ 1.0f,  1.0f,  1.0f,
+ 1.0f,  1.0f, -1.0f,
+ 1.0f, -1.0f, -1.0f,
+
+-1.0f, -1.0f,  1.0f,
+-1.0f,  1.0f,  1.0f,
+ 1.0f,  1.0f,  1.0f,
+ 1.0f,  1.0f,  1.0f,
+ 1.0f, -1.0f,  1.0f,
+-1.0f, -1.0f,  1.0f,
+
+-1.0f,  1.0f, -1.0f,
+ 1.0f,  1.0f, -1.0f,
+ 1.0f,  1.0f,  1.0f,
+ 1.0f,  1.0f,  1.0f,
+-1.0f,  1.0f,  1.0f,
+-1.0f,  1.0f, -1.0f,
+
+-1.0f, -1.0f, -1.0f,
+-1.0f, -1.0f,  1.0f,
+ 1.0f, -1.0f, -1.0f,
+ 1.0f, -1.0f, -1.0f,
+-1.0f, -1.0f,  1.0f,
+ 1.0f, -1.0f,  1.0f
 };
 
 int main()
@@ -59,7 +107,7 @@ int main()
 	// Create a windowed mode window and its OpenGL context
 	GLFWwindow* window = glfwCreateWindow(1920, 1080, "Hello World", NULL, NULL);
 	// set up the camera
-	proj = glm::perspective(glm::radians(45.0f), 640.0f / 480.0f, 0.1f, 100.0f);
+	proj = glm::perspective(glm::radians(45.0f), 1920.f / 1080.f, 0.1f, 100.0f);
 	view = glm::lookAt(
 		cameraPos, // camera position
 		glm::vec3(0.0f, 0.4f, 0.0f), // target position
@@ -103,10 +151,35 @@ int main()
 
 
 	// tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
-	stbi_set_flip_vertically_on_load(true);
+	//stbi_set_flip_vertically_on_load(true);
+
 
 	// configure global opengl state
 	glEnable(GL_DEPTH_TEST);
+
+	// Setup skybox VAO
+	GLuint skyboxVAO, skyboxVBO;
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glBindVertexArray(0);
+
+	// Cubemap (Skybox)
+	vector<const GLchar*> faces;
+	faces.push_back("skybox/right.jpg");
+	faces.push_back("skybox/left.jpg");
+	faces.push_back("skybox/top.jpg");
+	faces.push_back("skybox/bottom.jpg");
+	faces.push_back("skybox/back.jpg");
+	faces.push_back("skybox/front.jpg");
+	GLuint cubemapTexture = loadCubemap(faces);
+
+	Shader skyboxShader("SkyboxVertexShader.glsl", "SkyboxFragmentShader.glsl");
+
 	Shader ourShader("RobotVertexShader.glsl", "RobotFragmentShader.glsl");
 
 	// load models
@@ -156,18 +229,26 @@ int main()
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(window))
 	{
-
 		//cameaMove();
 
 		// Render here
-		glClearColor(1.0, 1.0, 0.6, 1.0);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glUniformMatrix4fv(glGetUniformLocation(sceneShaderProgram, "proj"), 1, GL_FALSE, &proj[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(sceneShaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
-		glUniform4fv(glGetUniformLocation(sceneShaderProgram, "ourColor"), 1, &color[0]);
+		glDepthMask(GL_FALSE);// Remember to turn depth writing off
+		skyboxShader.use();
+		
 
-		ground.Draw();
+		skyboxShader.setMat4("projection", proj);
+		skyboxShader.setMat4("view", glm::mat4(glm::mat3(view)));
+		
+		glBindVertexArray(skyboxVAO);
+		glActiveTexture(GL_TEXTURE0);
+		skyboxShader.setInt("skybox", 0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+		glDepthMask(GL_TRUE);
 
 		// switch to the model shader
 		ourShader.use();
@@ -193,7 +274,6 @@ int main()
 		// switch back to the Scene shader
 		glUseProgram(sceneShaderProgram);
 		// draw the scene
-		ground.Draw();
 		// Poll for and process events
 		glfwPollEvents();
 
@@ -333,4 +413,32 @@ void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	view = glm::lookAt(cameraPos, // camera position
 		glm::vec3(0.0f, 0.4f, 0.0f), // target position
 		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
+}
+
+GLuint loadCubemap(vector<const GLchar*> faces)
+{
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	//glActiveTexture(GL_TEXTURE0);
+
+	int width, height;
+	unsigned char* image;
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+	for (GLuint i = 0; i < faces.size(); i++)
+	{
+		int nrComponents;
+		image = stbi_load(faces[i], &width, &height, &nrComponents, 0);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,
+			GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		stbi_image_free(image);
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+	return textureID;
 }
