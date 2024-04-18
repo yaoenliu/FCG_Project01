@@ -40,6 +40,8 @@ void cameaMove(); // camera movement function
 
 GLuint sceneShaderProgram; // scene shader program
 
+int selectedJoint = 0;
+
 // global shader info
 ShaderInfo shaders[] = {
 	{GL_VERTEX_SHADER, "vertexShader.glsl"},
@@ -64,7 +66,7 @@ int main()
 		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
 
 	// set the initial color
-	color = glm::vec4(105.0/255, 72.0/255, 40.0/255, 1.0f);
+	color = glm::vec4(105.0 / 255, 72.0 / 255, 40.0 / 255, 1.0f);
 
 	// detect if the window wasn't created
 	if (!window)
@@ -111,7 +113,6 @@ int main()
 	Model androidBot("robot.obj");
 	androidBot.setShader(&ourShader);
 	androidBot.setScale(0.1f);
-
 	// make animation
 	Animation ourAnimation(3);
 	Animator ourAnimator(androidBot, ourShader);
@@ -139,7 +140,7 @@ int main()
 	//ourAnimation.keyFrames.push_back(keyFrame(state, 5.5));
 
 	androidBot.animations.push_back(ourAnimation);
-	androidBot.setMode(loop);
+	androidBot.setMode(stop);
 
 	// setup imgui
 	// -----------
@@ -202,20 +203,23 @@ int main()
 		ImGui::NewFrame();
 
 		ImGui::Begin("Hello, world!");
-		ImGui::SetWindowSize(ImVec2(480, 270));
 		static float f = 0.1f;
-		ImGui::SliderFloat ("Scale", &f, 0.1f, 0.3f);
+		ImGui::SliderFloat("Scale", &f, 0.1f, 0.3f);
 		androidBot.rootMesh->translation = glm::vec3(0.0f, 0.0f, 0.0f);
-
-		ImGui::ColorEdit3("color", &color[0]);
-		ImGui::SliderFloat("posx", &position.x, -10.0f, 10.0f);
-		ImGui::SliderFloat("posy", &position.y, -10.0f, 10.0f);
-		ImGui::SliderFloat("posz", &position.z, -10.0f, 10.0f);
-		if (ImGui::Button("reset"))
-		{
-			position = glm::vec3(0.0f, 0.0f, 0.0f);
+		ImGui::ColorEdit3("color", glm::value_ptr(color));
+		const char** jointItems = new const char* [androidBot.joints.size()];
+		for (size_t i = 0; i < androidBot.joints.size(); i++) {
+			jointItems[i] = androidBot.joints[i].c_str();
 		}
-		//obj.setPosition(position);
+		ImGui::Combo("Joint", &selectedJoint, jointItems, androidBot.joints.size());
+		ImGui::Text("Translation");
+		ImGui::SameLine();
+		if (ImGui::Button("reset"))
+			androidBot.jointMesh[androidBot.joints[selectedJoint]]->translation = glm::vec3(0.0f, 0.0f, 0.0f);
+		ImGui::SliderFloat("posx", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->translation.x, -10.0f, 10.0f);
+		ImGui::SliderFloat("posy", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->translation.y, -10.0f, 10.0f);
+		ImGui::SliderFloat("posz", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->translation.z, -10.0f, 10.0f);
+
 		// Random Color Button
 		if (ImGui::Button("Random Color"))
 		{
@@ -284,7 +288,9 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	static double lastX = xpos;
 	static double lastY = ypos;
-	if (!mouseS[0])
+	ImGuiIO& io = ImGui::GetIO();
+	io.AddMouseWheelEvent(xpos, ypos);
+	if (!mouseS[0] || io.WantCaptureMouse)
 	{
 		lastX = xpos;
 		lastY = ypos;
@@ -299,7 +305,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	if (horizontal_angle < 0)horizontal_angle += 360;
 	if (vertical_angle > 89)vertical_angle = 89;
 	if (vertical_angle < -89)vertical_angle = -89;
-	
+
 	cameraPos = glm::vec3(dist * cos(glm::radians(vertical_angle)) * sin(glm::radians(horizontal_angle)), dist * sin(glm::radians(vertical_angle)), dist * cos(glm::radians(vertical_angle)) * cos(glm::radians(horizontal_angle)));
 	view = glm::lookAt(cameraPos, // camera position
 		glm::vec3(0.0f, 0.4f, 0.0f), // target position
@@ -322,7 +328,7 @@ void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	dist -= 0.1 * yoffset;
 	if (dist < 1.0f)dist = 1.0f;
-	if (dist > 10.0f)dist = 10.0f;	
+	if (dist > 10.0f)dist = 10.0f;
 	cameraPos = glm::vec3(dist * cos(glm::radians(vertical_angle)) * sin(glm::radians(horizontal_angle)), dist * sin(glm::radians(vertical_angle)), dist * cos(glm::radians(vertical_angle)) * cos(glm::radians(horizontal_angle)));
 	view = glm::lookAt(cameraPos, // camera position
 		glm::vec3(0.0f, 0.4f, 0.0f), // target position
