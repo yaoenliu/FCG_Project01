@@ -238,11 +238,11 @@ int main()
 
 		glDepthMask(GL_FALSE);// Remember to turn depth writing off
 		skyboxShader.use();
-		
+
 
 		skyboxShader.setMat4("projection", proj);
 		skyboxShader.setMat4("view", glm::mat4(glm::mat3(view)));
-		
+
 		glBindVertexArray(skyboxVAO);
 		glActiveTexture(GL_TEXTURE0);
 		skyboxShader.setInt("skybox", 0);
@@ -266,10 +266,10 @@ int main()
 		//ourAnimator.update((float)glfwGetTime());
 
 		ourShader.setVec3("viewPos", position);
-		ourShader.setVec3("light.position", 0, 0, 50);
-		ourShader.setVec3("light.ambient", 0.1, 0.1, 0.1);
-		ourShader.setVec3("light.diffuse", 0.8, 0.8, 0.8);
-		ourShader.setVec3("light.specular", 1, 1, 1);
+		ourShader.setVec3("light.position", -50, 100, -50);
+		ourShader.setVec3("light.ambient", 0.1, 0.6, 0.1);
+		ourShader.setVec3("light.diffuse", 5, 5, 5);
+		ourShader.setVec3("light.specular", 0,0,0);
 
 		// Scene part
 		// switch back to the Scene shader
@@ -300,7 +300,21 @@ int main()
 		ImGui::SliderFloat("posx", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.translation.x, -10.0f, 10.0f);
 		ImGui::SliderFloat("posy", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.translation.y, -10.0f, 10.0f);
 		ImGui::SliderFloat("posz", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.translation.z, -10.0f, 10.0f);
+		ImGui::Text("scale");
+		ImGui::SameLine();
+		if (ImGui::Button("reset"))
+			androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.scale = glm::vec3(1.0f, 1.0f, 1.0f);
+		ImGui::SliderFloat("sclx", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.scale.x, 0.2f, 5.0f);
+		ImGui::SliderFloat("scly", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.scale.y, 0.2f, 5.0f);
+		ImGui::SliderFloat("sclz", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.scale.z, 0.2f, 5.0f);
 
+		ImGui::Text("rotation");
+		ImGui::SameLine();
+		if (ImGui::Button("reset"))
+			androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.rotation = glm::fquat(1, 0, 0, 0);
+		ImGui::SliderAngle("rotx", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.rotation.x);
+		ImGui::SliderAngle("roty", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.rotation.y);
+		ImGui::SliderAngle("rotz", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.rotation.z);
 		// Random Color Button
 		if (ImGui::Button("Random Color"))
 		{
