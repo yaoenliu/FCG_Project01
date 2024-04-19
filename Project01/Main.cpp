@@ -383,9 +383,9 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	static double lastX = xpos;
 	static double lastY = ypos;
-	ImGuiIO& io = ImGui::GetIO();
-	io.AddMouseWheelEvent(xpos, ypos);
-	if (!mouseS[0] || io.WantCaptureMouse)
+	//ImGuiIO& io = ImGui::GetIO();
+	//io.AddMouseWheelEvent(xpos, ypos);
+	if (!mouseS[0]/* || io.WantCaptureMouse*/)
 	{
 		lastX = xpos;
 		lastY = ypos;
