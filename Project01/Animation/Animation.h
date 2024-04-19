@@ -6,26 +6,17 @@ class Animation
 private:
     modelState interpolate(modelState& start, modelState& end, float progression)
     {
-        modelState state;
-        if (start.isJoint && end.isJoint)
-        {
-            state.isJoint = 1;
-            state.translation = glm::mix(start.translation, end.translation, progression);
-            state.rotation = glm::slerp(start.rotation, end.rotation, progression);
-            state.scale = glm::mix(start.scale, end.scale, progression);
-        }
+        modelState outPutState;
 
-        if (start.children.size() != end.children.size() || start.isJoint xor end.isJoint)
+        for (auto& [name, startJoint] : start.jointMap)
         {
-            std::cout << "modelState problem";
-            return state;
-        }
+            jointState &endJoint =  end.jointMap[name];
 
-        for (int i = 0; i < start.children.size(); i++)
-        {
-            state.children.push_back(interpolate(start.children[i], end.children[i], progression));
+            outPutState.jointMap[name] = jointState(glm::mix(startJoint.translation, endJoint.translation, progression),
+                    glm::slerp(startJoint.rotation, endJoint.rotation, progression),
+                    glm::mix(startJoint.scale, endJoint.scale, progression));
         }
-        return state;
+        return outPutState;
     }
 
 public:

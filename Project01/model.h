@@ -58,7 +58,14 @@ public:
 	void setMode(int mode) { playMode = mode; }
 	int playMode = stop;
 	int animationIndex;
+
+	void addKeyFrame(const float& time);
+	void saveAnimation(fstream& fout, const int& index);
+	void loadAnimation(fstream& fin, const int& index);
 	
+	// model state operation
+	void loadModelState(modelState& state);
+	modelState getModelState();
 
 private:
 	unordered_map<string, meshNode*> nodeMap;
@@ -127,7 +134,7 @@ void Model::AnimatorUpdate()
 		}
 	}
 	modelState state = curAnimation.update(playTime);
-	rootMesh->loadModelState(state);	
+	loadModelState(state);	
 	lastUpdate = curTime;
 }
 // draws the model, and thus all its meshes
@@ -139,12 +146,12 @@ void Model::Draw()
 // set Scale with different value for each axis
 void Model::setScale(glm::vec3 scale)
 {
-	rootMesh->scale = scale;
+	rootMesh->joint.scale = scale;
 }
 // set Scale for all axis
 void Model::setScale(float scale)
 {
-	rootMesh->scale = glm::vec3(scale);
+	rootMesh->joint.scale = glm::vec3(scale);
 }
 
 void Model::loadModel(string const& path)
@@ -510,6 +517,27 @@ unsigned int TextureFromFile(const char* path, const string& directory, bool gam
 	}
 
 	return textureID;
+}
+
+
+void Model::loadModelState(modelState& state)
+{
+	for (auto& [name, joint] : state.jointMap)
+	{
+		jointMesh[name]->joint = joint;
+	}
+}
+
+modelState Model::getModelState()
+{
+	modelState outputState;
+
+	for (auto& name : joints)
+	{
+		outputState.jointMap[name] = jointMesh[name]->joint;
+	}
+
+	return outputState;
 }
 
 #endif
