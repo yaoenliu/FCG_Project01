@@ -2,6 +2,7 @@
 #define MODEL_H
 #define STB_IMAGE_IMPLEMENTATION
 #include <glad/glad.h> 
+#include <GLFW/glfw3.h>
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
@@ -48,7 +49,7 @@ public:
 	unordered_map<string, meshNode*> jointMesh;
 
 	// constructor, expects a filepath to a 3D model.
-	Model(string const& path, bool gamma);
+	Model(string const& path, bool gamma = false);
 	void setShader(Shader* shader) { this->shader = shader; }
 	void Draw();// draws the model, and thus all its meshes
 	void setScale(glm::vec3 scale);// set Scale with different value for each axis
@@ -65,10 +66,11 @@ public:
 	void saveAnimation(fstream& fout, const int& animationIndex);
 	void loadAnimation(fstream& fin, const int& animationIndex);
 	void addAnimation(fstream& fin);
-	
+
 	// model state operation
 	void loadModelState(modelState& state);
 	modelState getModelState();
+	void reposition();
 
 private:
 	unordered_map<string, meshNode*> nodeMap;
@@ -81,79 +83,17 @@ private:
 	// checks all material textures of a given type and loads the textures if they're not loaded yet.
 	// the required info is returned as a Texture struct.
 	vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName);
-	Shader * shader;
+	Shader* shader;
 	// animation data
 	int curIndex;
-	float playTime, lastUpdate;	
+	float playTime, lastUpdate;
 	void AnimatorUpdate();
 };
 
-
-
 // constructor, expects a filepath to a 3D model.
-Model::Model(string const& path, bool gamma = false) : gammaCorrection(gamma)
+Model::Model(string const& path, bool gamma) : gammaCorrection(gamma)
 {
 	loadModel(path);
-}
-void Model::AnimatorUpdate()
-{
-	float curTime = glfwGetTime();
-	if (animations.empty())
-		return;
-	if (playMode==stop)
-	{
-		lastUpdate = curTime;
-		return;
-	}
-
-	float deltaTime = curTime - lastUpdate;
-	if (deltaTime < 0)                      // open windows too long
-	{
-		lastUpdate = curTime;
-		return;
-	}
-	playTime += deltaTime;
-
-	Animation& curAnimation = animations[curIndex];
-	if (playTime > curAnimation.duration)   // next animation
-	{
-		playTime = 0;
-		if (playMode==loop)
-			curIndex++;
-	}
-	if (curIndex >= animations.size())      // out of stack
-	{
-		playTime = 0;
-		if (playMode==loop)
-		{
-			curIndex = 0;
-		}
-		else
-		{
-			curIndex = 0;
-			playMode = stop;
-			return;
-		}
-	}
-	modelState state = curAnimation.update(playTime);
-	loadModelState(state);	
-	lastUpdate = curTime;
-}
-// draws the model, and thus all its meshes
-void Model::Draw()
-{
-	AnimatorUpdate();
-	rootMesh->Draw(*shader);
-}
-// set Scale with different value for each axis
-void Model::setScale(glm::vec3 scale)
-{
-	rootMesh->joint.scale = scale;
-}
-// set Scale for all axis
-void Model::setScale(float scale)
-{
-	rootMesh->joint.scale = glm::vec3(scale);
 }
 
 void Model::loadModel(string const& path)
@@ -384,7 +324,6 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
 	return textures;
 }
 
-
 unsigned int TextureFromFile(const char* path, const string& directory, bool gamma)
 {
 	string filename = string(path);
@@ -426,6 +365,24 @@ unsigned int TextureFromFile(const char* path, const string& directory, bool gam
 }
 
 
+// draws the model, and thus all its meshes
+void Model::Draw()
+{
+	AnimatorUpdate();
+	rootMesh->Draw(*shader);
+}
+// set Scale with different value for each axis
+void Model::setScale(glm::vec3 scale)
+{
+	rootMesh->joint.scale = scale;
+}
+// set Scale for all axis
+void Model::setScale(float scale)
+{
+	rootMesh->joint.scale = glm::vec3(scale);
+}
+
+
 void Model::loadModelState(modelState& state)
 {
 	for (auto& [name, joint] : state.jointMap)
@@ -439,9 +396,7 @@ modelState Model::getModelState()
 	modelState outputState;
 
 	for (auto& name : joints)
-	{
 		outputState.jointMap[name] = jointMesh[name]->joint;
-	}
 
 	return outputState;
 }
@@ -449,6 +404,52 @@ modelState Model::getModelState()
 void Model::addKeyFrame(const int& animationIndex, const float& time)
 {
 	animations[animationIndex].keyFrames.push_back(keyFrame(getModelState(), time));
+}
+
+
+void Model::AnimatorUpdate()
+{
+	float curTime = glfwGetTime();
+	if (animations.empty())
+		return;
+	if (playMode == stop)
+	{
+		lastUpdate = curTime;
+		return;
+	}
+
+	float deltaTime = curTime - lastUpdate;
+	if (deltaTime < 0)                      // open windows too lDong
+	{
+		lastUpdate = curTime;
+		return;
+	}
+	playTime += deltaTime;
+
+	Animation& curAnimation = animations[curIndex];
+	if (playTime > curAnimation.duration)   // next animation
+	{
+		playTime = 0;
+		if (playMode == loop)
+			curIndex++;
+	}
+	if (curIndex >= animations.size())      // out of stack
+	{
+		playTime = 0;
+		if (playMode == loop)
+		{
+			curIndex = 0;
+		}
+		else
+		{
+			curIndex = 0;
+			playMode = stop;
+			return;
+		}
+	}
+	modelState state = curAnimation.update(playTime);
+	loadModelState(state);
+	lastUpdate = curTime;
 }
 
 void Model::addNewAnimeation(const float& duration)
@@ -464,7 +465,7 @@ void Model::saveAnimation(fstream& fout, const int& animationIndex)
 	for (const auto& frame : animation.keyFrames)
 	{
 		fout << frame.time << "\n";
-		
+
 		for (const auto& [name, joint] : frame.state.jointMap)
 		{
 			fout << name << '\n';
@@ -511,6 +512,14 @@ void Model::addAnimation(fstream& fin)
 		}
 	}
 	animations.push_back(animation);
+}
+
+void Model::reposition()
+{
+	for (const auto& name : joints)
+	{
+		jointMesh[name]->joint = jointState();
+	}
 }
 
 #endif

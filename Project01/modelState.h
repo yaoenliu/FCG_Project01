@@ -13,8 +13,5 @@ class modelState
 public:
 	std::unordered_map<std::string, jointState> jointMap;
 
-	jointState& operator[](const std::string& name)
-	{
-		return jointMap[name];
-	}
+	jointState& operator[](const std::string& name);
 };
