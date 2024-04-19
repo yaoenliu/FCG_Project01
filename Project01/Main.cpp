@@ -185,33 +185,9 @@ int main()
 	// load models
 	Model androidBot("robot.obj");
 	androidBot.setShader(&ourShader);
-	androidBot.setScale(0.1f);
+
 	// make animation
-	//Animation ourAnimation(3);
-	//modelState state = androidBot.getModelState();
-
-	//ourAnimation.keyFrames.push_back(keyFrame(state, 0));
-	//state["Body"].rotation = glm::angleAxis(glm::radians(120.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-	//ourAnimation.keyFrames.push_back(keyFrame(state, 1));
-	//state["Body"].rotation = glm::angleAxis(glm::radians(240.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-	//ourAnimation.keyFrames.push_back(keyFrame(state, 2));
-	//state["Body"].rotation = glm::fquat(1, 0, 0, 0);
-	//ourAnimation.keyFrames.push_back(keyFrame(state, 3));
-
-	//state.translation = glm::vec3(0, 10, 0);
-	//state.children[0].children[1].rotation = glm::angleAxis(glm::radians(175.0f), glm::vec3(0.0f, 0.0f, -1.0f));	// rArm
-	//state.children[0].children[1].children[0].children[0].rotation = glm::angleAxis(glm::radians(30.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-	//state.children[0].children[2].rotation = glm::angleAxis(glm::radians(175.0f), glm::vec3(0.0f, 0.0f, 1.0f));	// lArm
-	//state.children[0].children[2].children[0].children[0].rotation = glm::angleAxis(glm::radians(30.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	//ourAnimation.keyFrames.push_back(keyFrame(state, 5));
-	//state.translation = glm::vec3(0, 0, 0);
-	//state.children[0].children[1].rotation = glm::fquat(1, 0, 0, 0);	// rArm
-	//state.children[0].children[1].children[0].children[0].rotation = glm::fquat(1, 0, 0, 0);
-	//state.children[0].children[2].rotation = glm::fquat(1, 0, 0, 0);	// lArm
-	//state.children[0].children[2].children[0].children[0].rotation = glm::fquat(1, 0, 0, 0);
-	//ourAnimation.keyFrames.push_back(keyFrame(state, 5.5));
-
-	androidBot.setMode(playMode::once);
+	androidBot.setMode(playMode::stop);
 
 	fstream saved(".\\robotAnimation.txt", ios::in);
 	androidBot.addAnimation(saved);
@@ -260,8 +236,7 @@ int main()
 		ourShader.setMat4("view", view);
 
 		// render the loaded model
-		//modelState curState = ourAnimation.update((float)glfwGetTime());
-		//ourModel.rootMesh->loadModelState(curState);
+		androidBot.setScale(0.1f);
 		androidBot.Draw();
 
 		//ourAnimator.update((float)glfwGetTime());
@@ -294,28 +269,36 @@ int main()
 			jointItems[i] = androidBot.joints[i].c_str();
 		}
 		ImGui::Combo("Joint", &selectedJoint, jointItems, androidBot.joints.size());
+		jointState& slectedJoint = androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint;
+
 		ImGui::Text("Translation");
 		ImGui::SameLine();
+
 		if (ImGui::Button("reset"))
-			androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.translation = glm::vec3(0.0f, 0.0f, 0.0f);
-		ImGui::SliderFloat("posx", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.translation.x, -10.0f, 10.0f);
-		ImGui::SliderFloat("posy", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.translation.y, -10.0f, 10.0f);
-		ImGui::SliderFloat("posz", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.translation.z, -10.0f, 10.0f);
+			slectedJoint.translation = glm::vec3(0.0f, 0.0f, 0.0f);
+		ImGui::SliderFloat("posx", &slectedJoint.translation.x, -10.0f, 10.0f);
+		ImGui::SliderFloat("posy", &slectedJoint.translation.y, -10.0f, 10.0f);
+		ImGui::SliderFloat("posz", &slectedJoint.translation.z, -10.0f, 10.0f);
 		ImGui::Text("scale");
 		ImGui::SameLine();
-		if (ImGui::Button("reset"))
-			androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.scale = glm::vec3(1.0f, 1.0f, 1.0f);
-		ImGui::SliderFloat("sclx", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.scale.x, 0.2f, 5.0f);
-		ImGui::SliderFloat("scly", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.scale.y, 0.2f, 5.0f);
-		ImGui::SliderFloat("sclz", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.scale.z, 0.2f, 5.0f);
 
+		if (ImGui::Button("reset"))
+			slectedJoint.scale = glm::vec3(1.0f, 1.0f, 1.0f);
+		ImGui::SliderFloat("sclx", &slectedJoint.scale.x, 0.2f, 5.0f);
+		ImGui::SliderFloat("scly", &slectedJoint.scale.y, 0.2f, 5.0f);
+		ImGui::SliderFloat("sclz", &slectedJoint.scale.z, 0.2f, 5.0f);
 		ImGui::Text("rotation");
 		ImGui::SameLine();
+
 		if (ImGui::Button("reset"))
-			androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.rotation = glm::fquat(1, 0, 0, 0);
-		ImGui::SliderAngle("rotx", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.rotation.x);
-		ImGui::SliderAngle("roty", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.rotation.y);
-		ImGui::SliderAngle("rotz", &androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint.rotation.z);
+			slectedJoint.rotation = glm::fquat(1, 0, 0, 0);
+		glm::vec3 normal = glm::vec3(0.0f, 0.0f, -1.0f);
+		float degree = 0.0f;
+		ImGui::SliderAngle("rotx", &normal.x);
+		ImGui::SliderAngle("roty", &normal.y);
+		ImGui::SliderAngle("rotz", &normal.z);
+
+
 		// Random Color Button
 		if (ImGui::Button("Random Color"))
 		{
