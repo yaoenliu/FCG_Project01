@@ -23,6 +23,12 @@ public:
     std::vector<keyFrame> keyFrames;
     float duration;
 
+    void reset()
+    {
+        keyFrames.clear();
+        duration = 0.0f;
+    }
+
     // set the duration of the animation
     Animation(float duration) : duration(duration)
     {

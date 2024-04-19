@@ -186,17 +186,16 @@ int main()
 	androidBot.setShader(&ourShader);
 	androidBot.setScale(0.1f);
 	// make animation
-	Animation ourAnimation(3);
-	Animator ourAnimator(androidBot, ourShader);
-	modelState state = androidBot.getModelState();
+	//Animation ourAnimation(3);
+	//modelState state = androidBot.getModelState();
 
-	ourAnimation.keyFrames.push_back(keyFrame(state, 0));
-	state.jointMap["Body"].rotation = glm::angleAxis(glm::radians(120.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-	ourAnimation.keyFrames.push_back(keyFrame(state, 1));
-	state.jointMap["Body"].rotation = glm::angleAxis(glm::radians(240.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-	ourAnimation.keyFrames.push_back(keyFrame(state, 2));
-	state.jointMap["Body"].rotation = glm::fquat(1, 0, 0, 0);
-	ourAnimation.keyFrames.push_back(keyFrame(state, 3));
+	//ourAnimation.keyFrames.push_back(keyFrame(state, 0));
+	//state["Body"].rotation = glm::angleAxis(glm::radians(120.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+	//ourAnimation.keyFrames.push_back(keyFrame(state, 1));
+	//state["Body"].rotation = glm::angleAxis(glm::radians(240.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+	//ourAnimation.keyFrames.push_back(keyFrame(state, 2));
+	//state["Body"].rotation = glm::fquat(1, 0, 0, 0);
+	//ourAnimation.keyFrames.push_back(keyFrame(state, 3));
 
 	//state.translation = glm::vec3(0, 10, 0);
 	//state.children[0].children[1].rotation = glm::angleAxis(glm::radians(175.0f), glm::vec3(0.0f, 0.0f, -1.0f));	// rArm
@@ -211,8 +210,11 @@ int main()
 	//state.children[0].children[2].children[0].children[0].rotation = glm::fquat(1, 0, 0, 0);
 	//ourAnimation.keyFrames.push_back(keyFrame(state, 5.5));
 
-	androidBot.animations.push_back(ourAnimation);
-	androidBot.setMode(playMode::stop);
+	androidBot.setMode(playMode::once);
+
+	fstream saved(".\\robotAnimation.txt", ios::in);
+	androidBot.addAnimation(saved);
+	saved.close();
 
 	// setup imgui
 	// -----------

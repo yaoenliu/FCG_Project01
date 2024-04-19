@@ -3,6 +3,9 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/quaternion.hpp>
+#include <fstream>
+#include <iostream>
+#include <string>
 
 class jointState
 {
@@ -29,6 +32,21 @@ public:
 		rotation = state.rotation;
 		scale = state.scale;
 	}
+
+	friend std::fstream& operator>>(std::fstream& fin, jointState& state)
+	{
+		std::string str = "";
+		std::getline(fin, str);
+		sscanf_s(str.c_str(), "%f %f %f", &state.translation.x, &state.translation.y, &state.translation.z);
+		std::getline(fin, str);
+		sscanf_s(str.c_str(), "%f %f %f %f", &state.rotation.w, &state.rotation.x, &state.rotation.y, &state.rotation.z);
+		std::getline(fin, str);
+		sscanf_s(str.c_str(), "%f %f %f", &state.scale.x, &state.scale.y, &state.scale.z);
+
+		return fin;
+	}
+
+	friend std::fstream& operator<<(std::fstream& fout, const jointState& state);
 
 	glm::mat4 translationMatrix()
 	{
