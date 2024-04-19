@@ -3,8 +3,8 @@
 jointState::jointState()
 {
 	translation = glm::vec3(0.0f);
-	rotation = glm::fquat(1.0f, 0.0f, 0.0f, 0.0f);
-	scale = glm::vec3(1.0f, 1.0f, 1.0f);
+	rotation = glm::vec3(0.0f);
+	scale = glm::vec3(1.0f);
 }
 
 void jointState::operator=(jointState state)
@@ -20,7 +20,7 @@ std::fstream& operator>>(std::fstream& fin, jointState& state)
 	std::getline(fin, str);
 	sscanf_s(str.c_str(), "%f %f %f", &state.translation.x, &state.translation.y, &state.translation.z);
 	std::getline(fin, str);
-	sscanf_s(str.c_str(), "%f %f %f %f", &state.rotation.w, &state.rotation.x, &state.rotation.y, &state.rotation.z);
+	sscanf_s(str.c_str(), "%f %f %f", &state.rotation.x, &state.rotation.y, &state.rotation.z);
 	std::getline(fin, str);
 	sscanf_s(str.c_str(), "%f %f %f", &state.scale.x, &state.scale.y, &state.scale.z);
 
@@ -30,7 +30,7 @@ std::fstream& operator>>(std::fstream& fin, jointState& state)
 std::fstream& operator<<(std::fstream& fout, const jointState& state)
 {
 	fout << state.translation.x << " " << state.translation.y << " " << state.translation.z << "\n" <<
-		state.rotation.w << " " << state.rotation.x << " " << state.rotation.y << " " << state.rotation.z << "\n" <<
+		state.rotation.x << " " << state.rotation.y << " " << state.rotation.z << "\n" <<
 		state.scale.x << " " << state.scale.y << " " << state.scale.z << "\n";
 	return fout;
 }
@@ -42,7 +42,9 @@ glm::mat4 jointState::translationMatrix()
 
 glm::mat4 jointState::rotationMatrix()
 {
-	return glm::mat4_cast(rotation);
+	return glm::rotate(glm::mat4(1.0f), glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f)) *
+		glm::rotate(glm::mat4(1.0f), glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f)) *
+		glm::rotate(glm::mat4(1.0f), glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 glm::mat4 jointState::scaleMatrix()

@@ -11,11 +11,11 @@ class jointState
 {
 public:
 	glm::vec3 scale;
-	glm::fquat rotation;
+	glm::vec3 rotation;
 	glm::vec3 translation;
 
 	jointState();
-	jointState(glm::vec3 translation, glm::fquat rotation, glm::vec3 scale) : translation(translation), rotation(rotation), scale(scale) { }
+	jointState(glm::vec3 translation, glm::vec3 rotation, glm::vec3 scale) : translation(translation), rotation(rotation), scale(scale) { }
 
 	void operator=(jointState state);
 	friend std::fstream& operator>>(std::fstream& fin, jointState& state);

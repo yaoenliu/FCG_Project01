@@ -186,6 +186,9 @@ int main()
 	Model androidBot("robot.obj");
 	androidBot.setShader(&ourShader);
 
+	glm::vec3 normal = glm::vec3(0.0f, 0.0f, -1.0f);
+	float degree = 0.0f;
+
 	// make animation
 	androidBot.setMode(playMode::stop);
 
@@ -274,29 +277,27 @@ int main()
 		ImGui::Text("Translation");
 		ImGui::SameLine();
 
-		if (ImGui::Button("reset"))
-			slectedJoint.translation = glm::vec3(0.0f, 0.0f, 0.0f);
+		if (ImGui::Button("reset translation"))
+			slectedJoint.translation = glm::vec3(0.0f);
 		ImGui::SliderFloat("posx", &slectedJoint.translation.x, -10.0f, 10.0f);
 		ImGui::SliderFloat("posy", &slectedJoint.translation.y, -10.0f, 10.0f);
 		ImGui::SliderFloat("posz", &slectedJoint.translation.z, -10.0f, 10.0f);
 		ImGui::Text("scale");
 		ImGui::SameLine();
 
-		if (ImGui::Button("reset"))
-			slectedJoint.scale = glm::vec3(1.0f, 1.0f, 1.0f);
+		if (ImGui::Button("reset scale"))
+			slectedJoint.scale = glm::vec3(1.0f);
 		ImGui::SliderFloat("sclx", &slectedJoint.scale.x, 0.2f, 5.0f);
 		ImGui::SliderFloat("scly", &slectedJoint.scale.y, 0.2f, 5.0f);
 		ImGui::SliderFloat("sclz", &slectedJoint.scale.z, 0.2f, 5.0f);
 		ImGui::Text("rotation");
 		ImGui::SameLine();
 
-		if (ImGui::Button("reset"))
-			slectedJoint.rotation = glm::fquat(1, 0, 0, 0);
-		glm::vec3 normal = glm::vec3(0.0f, 0.0f, -1.0f);
-		float degree = 0.0f;
-		ImGui::SliderAngle("rotx", &normal.x);
-		ImGui::SliderAngle("roty", &normal.y);
-		ImGui::SliderAngle("rotz", &normal.z);
+		if (ImGui::Button("reset rotation"))
+			slectedJoint.rotation = glm::vec3(0.0f);
+		ImGui::SliderFloat("rotx", &slectedJoint.rotation.x, -180.0f, 180.0f);
+		ImGui::SliderFloat("roty", &slectedJoint.rotation.y, -180.0f, 180.0f);
+		ImGui::SliderFloat("rotz", &slectedJoint.rotation.z, -180.0f, 180.0f);
 
 
 		// Random Color Button

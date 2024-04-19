@@ -13,7 +13,7 @@ private:
             jointState &endJoint =  end.jointMap[name];
 
             outPutState.jointMap[name] = jointState(glm::mix(startJoint.translation, endJoint.translation, progression),
-                    glm::slerp(startJoint.rotation, endJoint.rotation, progression),
+                    glm::eulerAngles(glm::slerp(glm::quat(startJoint.rotation), glm::quat(endJoint.rotation), progression)),
                     glm::mix(startJoint.scale, endJoint.scale, progression));
         }
         return outPutState;
