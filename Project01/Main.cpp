@@ -43,6 +43,7 @@ GLuint sceneShaderProgram; // scene shader program
 
 int selectedJoint = 0;
 
+ImGuiIO io;
 
 // global shader info
 ShaderInfo shaders[] = {
@@ -220,7 +221,7 @@ int main()
 	// -----------
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	ImGui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -269,7 +270,7 @@ int main()
 		ourShader.setVec3("light.position", -50, 100, -50);
 		ourShader.setVec3("light.ambient", 0.1, 0.6, 0.1);
 		ourShader.setVec3("light.diffuse", 5, 5, 5);
-		ourShader.setVec3("light.specular", 0,0,0);
+		ourShader.setVec3("light.specular", 0, 0, 0);
 
 		// Scene part
 		// switch back to the Scene shader
@@ -383,16 +384,20 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	static double lastX = xpos;
 	static double lastY = ypos;
-	//ImGuiIO& io = ImGui::GetIO();
-	//io.AddMouseWheelEvent(xpos, ypos);
-	if (!mouseS[0]/* || io.WantCaptureMouse*/)
+
+	if (!mouseS[0])
 	{
 		lastX = xpos;
 		lastY = ypos;
 		glfwSetWindowTitle(window, ("(" + std::to_string(xpos) + ", " + std::to_string(ypos) + ") angle (" + std::to_string(horizontal_angle) + ", " + std::to_string(vertical_angle) + ")").c_str());
 		return;
 	}
-
+	if (ImGui::GetIO().WantCaptureMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		return;
+	}
 	horizontal_angle += speed * (lastX - xpos);
 	vertical_angle -= speed * (lastY - ypos);
 	if (sin(glm::radians(vertical_angle)) < 0.1)vertical_angle = glm::degrees(asin(0.1));
