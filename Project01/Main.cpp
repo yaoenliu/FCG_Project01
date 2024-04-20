@@ -184,7 +184,7 @@ int main()
 	saved.open(".\\animationFile\\walkAnimation.txt", ios::in);
 	androidBot.addAnimation(saved);
 	saved.close();
-	saved.open(".\\animationFile\\jumping_jacks.txt", ios::in);
+	saved.open(".\\animationFile\\jumping_jacks_v2.txt", ios::in);
 	androidBot.addAnimation(saved);
 	saved.close();
 	saved.open(".\\animationFile\\squatAnimation.txt", ios::in);
