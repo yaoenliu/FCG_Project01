@@ -281,7 +281,8 @@ int main()
 			strcpy_s(cstr, str.length() + 1, str.c_str());
 			frameItems[i] = cstr;
 		}
-		androidBot.playTime = androidBot.animations[0].keyFrames[selectedFrame].time;
+		if (androidBot.playMode == playMode::stop)
+			androidBot.playTime = androidBot.animations[0].keyFrames[selectedFrame].time;
 		ImGui::Combo("Frame", &selectedFrame, frameItems, androidBot.animations[0].keyFrames.size());
 		if (ImGui::Button("Key Frame Delete"))
 		{
