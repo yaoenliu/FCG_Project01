@@ -431,12 +431,20 @@ int main()
 // key callback function
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	static int windowWidth, windowHeight, windowPosX, windowPosY;
 	static bool isFullScreen = false;
-	if(key==GLFW_KEY_F&&action==GLFW_PRESS)
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+		if (isFullScreen)
+		{
+			glfwSetWindowMonitor(window, NULL, windowPosX, windowPosY, windowWidth, windowHeight, GLFW_DONT_CARE);
+			isFullScreen = false;
+		}
+		else
+			glfwSetWindowShouldClose(window, GLFW_TRUE);
+
+	if (key == GLFW_KEY_F && action == GLFW_PRESS)
 	{
-		static int windowWidth , windowHeight , windowPosX , windowPosY;
+		static int windowWidth, windowHeight, windowPosX, windowPosY;
 		if (isFullScreen)
 		{
 			glfwSetWindowMonitor(window, NULL, windowPosX, windowPosY, windowWidth, windowHeight, GLFW_DONT_CARE);
@@ -530,6 +538,8 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
+	if (ImGui::GetIO().WantCaptureMouse)
+		return;
 	dist -= 0.1 * yoffset;
 	if (dist < 1.0f)dist = 1.0f;
 	if (dist > 10.0f)dist = 10.0f;
