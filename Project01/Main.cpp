@@ -399,7 +399,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	{
 		lastX = xpos;
 		lastY = ypos;
-		glfwSetWindowTitle(window, ("(" + std::to_string(xpos) + ", " + std::to_string(ypos) + ") angle (" + std::to_string(horizontal_angle) + ", " + std::to_string(vertical_angle) + ")").c_str());
 		return;
 	}
 	if (ImGui::GetIO().WantCaptureMouse)
