@@ -187,7 +187,12 @@ int main()
 	saved.open(".\\Kame_Hame_Ha.txt", ios::in);
 	androidBot.addAnimation(saved);
 	saved.close();
-
+	saved.open(".\\walkAnimation.txt", ios::in);
+	androidBot.addAnimation(saved);
+	saved.close();
+	saved.open(".\\puuAnimation.txt", ios::in);
+	androidBot.addAnimation(saved);
+	saved.close();
 	// setup imgui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -428,6 +433,26 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	static bool isFullScreen = false;
+	if(key==GLFW_KEY_F&&action==GLFW_PRESS)
+	{
+		static int windowWidth , windowHeight , windowPosX , windowPosY;
+		if (isFullScreen)
+		{
+			glfwSetWindowMonitor(window, NULL, windowPosX, windowPosY, windowWidth, windowHeight, GLFW_DONT_CARE);
+			isFullScreen = false;
+		}
+		else
+		{
+			glfwGetWindowPos(window, &windowPosX, &windowPosY);
+			glfwGetWindowSize(window, &windowWidth, &windowHeight);
+			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+			glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, GLFW_DONT_CARE);
+			isFullScreen = true;
+		}
+	}
+
 	if (key == GLFW_KEY_W)
 		keyS[0] = action == GLFW_RELEASE ? false : true;
 	if (key == GLFW_KEY_A)
