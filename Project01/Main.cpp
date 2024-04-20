@@ -178,13 +178,22 @@ int main()
 	androidBot.setMode(playMode::stop);
 
 	fstream saved;
-	saved.open(".\\basicAnimation.txt", ios::in);
+	saved.open(".\\animationFile\\basicAnimation.txt", ios::in);
 	androidBot.addAnimation(saved);
 	saved.close();
-	saved.open(".\\squatAnimation.txt", ios::in);
+	saved.open(".\\animationFile\\walkAnimation.txt", ios::in);
 	androidBot.addAnimation(saved);
 	saved.close();
-	saved.open(".\\Kame_Hame_Ha.txt", ios::in);
+	saved.open(".\\animationFile\\jumping_jacks.txt", ios::in);
+	androidBot.addAnimation(saved);
+	saved.close();
+	saved.open(".\\animationFile\\squatAnimation.txt", ios::in);
+	androidBot.addAnimation(saved);
+	saved.close();
+	saved.open(".\\animationFile\\Kame_Hame_Ha.txt", ios::in);
+	androidBot.addAnimation(saved);
+	saved.close();
+	saved.open(".\\animationFile\\puuAnimation.txt", ios::in);
 	androidBot.addAnimation(saved);
 	saved.close();
 	saved.open(".\\walkAnimation.txt", ios::in);
