@@ -261,9 +261,10 @@ int main()
 		ImGui::NewFrame();
 
 		ImGui::Begin("Hello, world!");
-		static float f = 0.1f;
-		ImGui::SliderFloat("Scale", &f, 0.1f, 0.3f);
-		ImGui::ColorEdit3("color", glm::value_ptr(color));
+
+		if (ImGui::Button("Change display mode"))
+			androidBot.playMode = androidBot.playMode == playMode::stop ? playMode::once : playMode::stop;
+
 		const char** jointItems = new const char* [androidBot.joints.size()];
 		for (size_t i = 0; i < androidBot.joints.size(); i++) {
 			jointItems[i] = androidBot.joints[i].c_str();
@@ -295,17 +296,17 @@ int main()
 		ImGui::SliderFloat("roty", &slectedJoint.rotation.y, -180.0f, 180.0f);
 		ImGui::SliderFloat("rotz", &slectedJoint.rotation.z, -180.0f, 180.0f);
 
-		ImGui::InputFloat("Input Frame Time", &frameTime);
+		ImGui::Text("Frame Time");
 		ImGui::SameLine();
-		if (ImGui::Button("Add to key frame"))
+		ImGui::InputFloat("s", &frameTime);
+
+		if (ImGui::Button("Key Frame Add"))
 		{
 			androidBot.addKeyFrame(0, frameTime);
 			androidBot.animations[0].endWithLastFrame();
 		}
 
-		if (ImGui::Button("Change display mode"))
-			androidBot.playMode = androidBot.playMode == playMode::stop ? playMode::once : playMode::stop;
-
+		ImGui::Text("Save and Load");
 		char buffer[256] = ".\\robotAnimation.txt";
 		ImGui::InputText("path", buffer, 256);
 
