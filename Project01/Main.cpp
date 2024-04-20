@@ -44,6 +44,7 @@ GLuint sceneShaderProgram; // scene shader program
 int selectedJoint = 0;
 int selectedFrame = 0;
 
+
 ImGuiIO io;
 
 // global shader info
@@ -180,7 +181,12 @@ int main()
 	saved.open(".\\basicAnimation.txt", ios::in);
 	androidBot.addAnimation(saved);
 	saved.close();
-	androidBot.animations.push_back(Animation(0.0f));
+	saved.open(".\\squatAnimation.txt", ios::in);
+	androidBot.addAnimation(saved);
+	saved.close();
+	saved.open(".\\Kame_Hame_Ha.txt", ios::in);
+	androidBot.addAnimation(saved);
+	saved.close();
 
 	// setup imgui
 	IMGUI_CHECKVERSION();
@@ -244,96 +250,161 @@ int main()
 
 		ImGui::Begin("Hello, world!");
 
-		if (ImGui::Button("Change display mode"))
-			androidBot.playMode = androidBot.playMode == playMode::stop ? playMode::once : playMode::stop;
-
-		const char** jointItems = new const char* [androidBot.joints.size()];
-		for (size_t i = 0; i < androidBot.joints.size(); i++) {
-			jointItems[i] = androidBot.joints[i].c_str();
+		// select model part
+		const char** playModeItems = new const char* [playModeStr.size()];
+		for (size_t i = 0; i < playModeStr.size(); i++) {
+			playModeItems[i] = playModeStr[i].c_str();
 		}
-		ImGui::Combo("Joint", &selectedJoint, jointItems, androidBot.joints.size());
-		jointState& slectedJoint = androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint;
+		ImGui::Combo("Play Mode", &androidBot.playMode, playModeItems, playModeStr.size());
 
-		// select key frame part
-		const char** frameItems = new const char* [androidBot.animations[0].keyFrames.size()];
-		for (size_t i = 0; i < androidBot.animations[0].keyFrames.size(); i++) {
-			std::string str = std::to_string(androidBot.animations[0].keyFrames[i].time);
-			char* cstr = new char[str.length() + 1];
-			strcpy_s(cstr, str.length() + 1, str.c_str());
-			frameItems[i] = cstr;
+		// select animation part
+		const char** aniItems = new const char* [androidBot.animations.size()];
+		for (size_t i = 0; i < androidBot.animations.size(); i++) {
+			aniItems[i] = androidBot.animations[i].name.c_str();
 		}
-		if (androidBot.playMode == playMode::stop)
-			androidBot.playTime = androidBot.animations[0].keyFrames[selectedFrame].time;
-		ImGui::Combo("Frame", &selectedFrame, frameItems, androidBot.animations[0].keyFrames.size());
-		if (ImGui::Button("Key Frame Delete"))
+		ImGui::Combo("Animation", &androidBot.curIndex, aniItems, androidBot.animations.size());
+
+		if (androidBot.playMode == dev)
 		{
-			androidBot.animations[0].keyFrames.erase(androidBot.animations[0].keyFrames.begin() + selectedFrame);
-			selectedFrame = 0;
-		}
-		// joint control part
-		ImGui::Text("Translation");
-		ImGui::SameLine();
-		if (ImGui::Button("reset translation"))
-			slectedJoint.translation = glm::vec3(0.0f);
-		ImGui::SliderFloat("posx", &slectedJoint.translation.x, -50.0f, 50.0f);
-		ImGui::SliderFloat("posy", &slectedJoint.translation.y, -50.0f, 50.0f);
-		ImGui::SliderFloat("posz", &slectedJoint.translation.z, -50.0f, 50.0f);
+			// select joint part
+			const char** jointItems = new const char* [androidBot.joints.size()];
+			for (size_t i = 0; i < androidBot.joints.size(); i++) {
+				jointItems[i] = androidBot.joints[i].c_str();
+			}
+			ImGui::Combo("Joint", &selectedJoint, jointItems, androidBot.joints.size());
+			jointState& slectedJoint = androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint;
 
-		ImGui::Text("Scale");
-		ImGui::SameLine();
-		if (ImGui::Button("reset scale"))
-			slectedJoint.scale = glm::vec3(1.0f);
-		ImGui::SliderFloat("sclx", &slectedJoint.scale.x, 0.2f, 5.0f);
-		ImGui::SliderFloat("scly", &slectedJoint.scale.y, 0.2f, 5.0f);
-		ImGui::SliderFloat("sclz", &slectedJoint.scale.z, 0.2f, 5.0f);
 
-		ImGui::Text("Rotation");
-		ImGui::SameLine();
-		if (ImGui::Button("reset rotation"))
-			slectedJoint.rotation = glm::vec3(0.0f);
-		ImGui::SliderFloat("rotx", &slectedJoint.rotation.x, -180.0f, 180.0f);
-		ImGui::SliderFloat("roty", &slectedJoint.rotation.y, -180.0f, 180.0f);
-		ImGui::SliderFloat("rotz", &slectedJoint.rotation.z, -180.0f, 180.0f);
+			// select key frame part
+			const char** frameItems = new const char* [androidBot.animations[androidBot.curIndex].keyFrames.size()];
+			for (size_t i = 0; i < androidBot.animations[androidBot.curIndex].keyFrames.size(); i++) {
+				std::string str = std::to_string(androidBot.animations[androidBot.curIndex].keyFrames[i].time);
+				char* cstr = new char[str.length() + 1];
+				strcpy_s(cstr, str.length() + 1, str.c_str());
+				frameItems[i] = cstr;
+			}
+			ImGui::Combo("Frame", &selectedFrame, frameItems, androidBot.animations[androidBot.curIndex].keyFrames.size());
+			if (androidBot.playMode == dev)
+			{
+				androidBot.playTime = androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].time;
+			}
+			// delete frame button
+			if (ImGui::Button("Key Frame Delete"))
+			{
+				androidBot.animations[androidBot.curIndex].keyFrames.erase(androidBot.animations[androidBot.curIndex].keyFrames.begin() + selectedFrame);
+				selectedFrame = 0;
+			}
+			// joint control panel
+			ImGui::Text("Translation");
+			ImGui::SameLine();
+			if (ImGui::Button("reset translation"))
+				androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].translation = glm::vec3(0.0f);
+			ImGui::SliderFloat("posx", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].translation.x, -50.0f, 50.0f);
+			ImGui::SliderFloat("posy", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].translation.y, -50.0f, 50.0f);
+			ImGui::SliderFloat("posz", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].translation.z, -50.0f, 50.0f);
 
-		ImGui::Text("Animation time");
-		ImGui::SliderFloat("time", &androidBot.playTime, 0, androidBot.animations[0].duration);
+			ImGui::Text("Scale");
+			ImGui::SameLine();
+			if (ImGui::Button("reset scale"))
+				androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].scale = glm::vec3(1.0f);
+			ImGui::SliderFloat("sclx", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].scale.x, 0.2f, 5.0f);
+			ImGui::SliderFloat("scly", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].scale.y, 0.2f, 5.0f);
+			ImGui::SliderFloat("sclz", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].scale.z, 0.2f, 5.0f);
 
-		ImGui::Text("Frame Time");
-		ImGui::SameLine();
-		ImGui::InputFloat("s", &frameTime);
-
-		if (ImGui::Button("Key Frame Add"))
-		{
-			androidBot.addKeyFrame(0, frameTime);
-			androidBot.animations[0].endWithLastFrame();
-		}
-
-		ImGui::Text("Save and Load");
-		static char buffer[256] = ".\\robotAnimation.txt";
-		ImGui::InputText("path", buffer, 256);
-
-		if (ImGui::Button("Load animation"))
-		{
-			saved.open(buffer, ios::in);
-			androidBot.loadAnimation(saved, 0);
-			saved.close();
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Save animation"))
-		{
-			saved.open(buffer, ios::out);
-			androidBot.saveAnimation(saved, 0);
-			saved.close();
+			ImGui::Text("Rotation");
+			ImGui::SameLine();
+			if (ImGui::Button("reset rotation"))
+				androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].rotation = glm::vec3(0.0f);
+			ImGui::SliderFloat("rotx", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].rotation.x, -180.0f, 180.0f);
+			ImGui::SliderFloat("roty", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].rotation.y, -180.0f, 180.0f);
+			ImGui::SliderFloat("rotz", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].rotation.z, -180.0f, 180.0f);
 		}
 
-		// Random Color Button
-		if (ImGui::Button("Random Color"))
+		ImGui::Text("Animation seek bar");
+		ImGui::SliderFloat("time", &androidBot.playTime, 0, androidBot.animations[androidBot.curIndex].duration);
+		if (androidBot.playMode == dev)
 		{
-			color = glm::vec4(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, 1.0f);
+			int closestFrame = 0;
+			float closestTime = 100;
+			for (int i = 0; i < androidBot.animations[androidBot.curIndex].keyFrames.size(); i++)
+			{
+				float temp = abs(androidBot.animations[androidBot.curIndex].keyFrames[i].time - androidBot.playTime);
+				if (temp < closestTime)
+				{
+					closestTime = temp;
+					closestFrame = i;
+				}
+			}
+			selectedFrame = closestFrame;
+			androidBot.playTime = androidBot.animations[androidBot.curIndex].keyFrames[closestFrame].time;
+
+			// add key frame button
+			static bool addKeyFramePopup = false;
+			if (ImGui::Button("Key Frame Add"))
+			{
+				addKeyFramePopup = true;
+			}
+			if (addKeyFramePopup)
+			{
+				ImGui::OpenPopup("Add Animation");
+				if (ImGui::BeginPopupModal("Add Animation", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+					static float frameTime = 0.0f;
+					ImGui::InputFloat("frameTime at:", &frameTime);
+					if (ImGui::Button("Add"))
+					{
+						androidBot.addKeyFrame(androidBot.curIndex, frameTime);
+						androidBot.animations[androidBot.curIndex].endWithLastFrame();
+						addKeyFramePopup = false;
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::EndPopup();
+				}
+			}
+			// add animation button
+			static bool addAnimationPopup = false;
+			if (ImGui::Button("Add Animation"))
+			{
+				addAnimationPopup = true;
+			}
+			if (addAnimationPopup)
+			{
+				ImGui::OpenPopup("Add Animation");
+				if (ImGui::BeginPopupModal("Add Animation", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+					static char aniName[256] = "unnamed";
+					static float aniDuration = 0.0f;
+					ImGui::InputText("name", aniName, 256);
+					ImGui::InputFloat("duration", &aniDuration);
+					if (ImGui::Button("Add"))
+					{
+						androidBot.animations.push_back(Animation(aniName, aniDuration));
+						addAnimationPopup = false;
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::EndPopup();
+				}
+			}
+			ImGui::Text("Save and Load");
+			static char buffer[256] = ".\\robotAnimation.txt";
+			ImGui::InputText("path", buffer, 256);
+
+			if (ImGui::Button("Load animation"))
+			{
+				saved.open(buffer, ios::in);
+				androidBot.loadAnimation(saved, androidBot.curIndex);
+				saved.close();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Save animation"))
+			{
+				saved.open(buffer, ios::out);
+				androidBot.saveAnimation(saved, 0);
+				saved.close();
+			}
 		}
 		// Show FPS
 		ImGui::Text(" frame generated in %.3f ms\n FPS: %.1f", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
+		// quit button
 		if (ImGui::Button("Quit"))
 		{
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
