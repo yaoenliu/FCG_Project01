@@ -42,6 +42,7 @@ void cameaMove(); // camera movement function
 GLuint sceneShaderProgram; // scene shader program
 
 int selectedJoint = 0;
+int selectedFrame = 0;
 
 ImGuiIO io;
 
@@ -272,6 +273,23 @@ int main()
 		ImGui::Combo("Joint", &selectedJoint, jointItems, androidBot.joints.size());
 		jointState& slectedJoint = androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint;
 
+		// select key frame part
+		const char** frameItems = new const char* [androidBot.animations[0].keyFrames.size()];
+		for (size_t i = 0; i < androidBot.animations[0].keyFrames.size(); i++) {
+			std::string str = std::to_string(androidBot.animations[0].keyFrames[i].time);
+			char* cstr = new char[str.length() + 1];
+			strcpy_s(cstr, str.length() + 1, str.c_str());
+			frameItems[i] = cstr;
+		}
+		if (androidBot.playMode == playMode::stop)
+			androidBot.playTime = androidBot.animations[0].keyFrames[selectedFrame].time;
+		ImGui::Combo("Frame", &selectedFrame, frameItems, androidBot.animations[0].keyFrames.size());
+		if (ImGui::Button("Key Frame Delete"))
+		{
+			androidBot.animations[0].keyFrames.erase(androidBot.animations[0].keyFrames.begin() + selectedFrame);
+			selectedFrame = 0;
+		}
+		// joint control part
 		ImGui::Text("Translation");
 		ImGui::SameLine();
 		if (ImGui::Button("reset translation"))
@@ -295,6 +313,9 @@ int main()
 		ImGui::SliderFloat("rotx", &slectedJoint.rotation.x, -180.0f, 180.0f);
 		ImGui::SliderFloat("roty", &slectedJoint.rotation.y, -180.0f, 180.0f);
 		ImGui::SliderFloat("rotz", &slectedJoint.rotation.z, -180.0f, 180.0f);
+
+		ImGui::Text("Animation time");
+		ImGui::SliderFloat("time", &androidBot.playTime, 0, androidBot.animations[0].duration);
 
 		ImGui::Text("Frame Time");
 		ImGui::SameLine();
@@ -320,7 +341,7 @@ int main()
 		if (ImGui::Button("Save animation"))
 		{
 			saved.open(buffer, ios::out);
-			androidBot.saveAnimation(saved,0);
+			androidBot.saveAnimation(saved, 0);
 			saved.close();
 		}
 

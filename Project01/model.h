@@ -71,6 +71,7 @@ public:
 	void loadModelState(modelState& state);
 	modelState getModelState();
 	void reposition();
+	float playTime;
 
 private:
 	unordered_map<string, meshNode*> nodeMap;
@@ -86,7 +87,7 @@ private:
 	Shader* shader;
 	// animation data
 	int curIndex;
-	float playTime, lastUpdate;
+	float lastUpdate;
 	void AnimatorUpdate();
 };
 
