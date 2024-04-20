@@ -386,6 +386,8 @@ int main()
 					if (ImGui::Button("Add"))
 					{
 						androidBot.animations.push_back(Animation(aniName, aniDuration));
+						androidBot.addKeyFrame(androidBot.animations.size()-1, 0);
+						androidBot.animations[androidBot.animations.size() - 1].endWithLastFrame();
 						addAnimationPopup = false;
 						ImGui::CloseCurrentPopup();
 					}
