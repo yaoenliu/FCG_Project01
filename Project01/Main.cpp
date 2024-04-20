@@ -265,7 +265,14 @@ int main()
 			playModeItems[i] = playModeStr[i].c_str();
 		}
 		ImGui::Combo("Play Mode", &androidBot.playMode, playModeItems, playModeStr.size());
-
+		if (androidBot.playMode == stop)
+		{
+			ImGui::SameLine();
+			if (ImGui::Button("Replay"))
+			{
+				androidBot.setMode(playMode::once);
+			}
+		}
 		// select animation part
 		const char** aniItems = new const char* [androidBot.animations.size()];
 		for (size_t i = 0; i < androidBot.animations.size(); i++) {
