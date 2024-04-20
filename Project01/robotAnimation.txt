@@ -1,10 +1,10 @@
-1
 0
-RUpArm
+0
+LHorn
 0 0 0
 0 0 0
 1 1 1
-LHorn
+RUpArm
 0 0 0
 0 0 0
 1 1 1
@@ -42,11 +42,11 @@ LLeg
 1 1 1
 endFrame
 0.2
-RUpArm
+LHorn
 0 0 0
 0 0 0
 1 1 1
-LHorn
+RUpArm
 0 0 0
 0 0 0
 1 1 1
@@ -70,11 +70,11 @@ RLoArm
 0 0 0
 0 0 0
 1 1 1
-LUpArm
+LLoArm
 0 0 0
 0 0 0
 1 1 1
-LLoArm
+LUpArm
 0 0 0
 0 0 0
 1 1 1
@@ -84,11 +84,11 @@ LLeg
 1 1 1
 endFrame
 0.4
-RUpArm
+LHorn
 0 0 0
 0 0 0
 1 1 1
-LHorn
+RUpArm
 0 0 0
 0 0 0
 1 1 1
@@ -126,6 +126,48 @@ LLeg
 1 1 1
 endFrame
 1
+LHorn
+0 0 0
+0 0 0
+1 1 1
+RUpArm
+0 0 0
+0 0 0
+1 1 1
+Head
+0 0 0
+0 0 0
+1 1 1
+Body
+0 0 0
+0 -0 0
+0.1 0.1 0.1
+RLeg
+0 0 0
+0 0 0
+1 1 1
+RHorm
+0 0 0
+0 0 0
+1 1 1
+RLoArm
+0 0 0
+0 0 0
+1 1 1
+LLoArm
+0 0 0
+0 0 0
+1 1 1
+LUpArm
+0 0 0
+0 0 0
+1 1 1
+LLeg
+0 0 0
+0 0 0
+1 1 1
+endFrame
+0
 RUpArm
 0 0 0
 0 0 0
@@ -140,7 +182,7 @@ Head
 1 1 1
 Body
 0 0 0
-0 -0 0
+0 0 0
 0.1 0.1 0.1
 RLeg
 0 0 0

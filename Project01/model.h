@@ -256,22 +256,9 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 	// process materials
 	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-
-	// we assume a convention for sampler names in the shaders. Each diffuse texture should be named
-	// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
-	// Same applies to other texture as the following list summarizes:
-	// diffuse: texture_diffuseN
-	// specular: texture_specularN
-	// normal: texture_normalN
-
 	if (material->GetTextureCount(aiTextureType_DIFFUSE) == 0 && material->GetTextureCount(aiTextureType_SPECULAR) == 0) {
-		//没有贴图，之前读取模型的material的值
 		Material colorMaterial = loadMaterialWithoutTextures(material);
 		return Mesh(vertices, indices, colorMaterial);
-	}
-	else
-	{
-
 	}
 
 	// 1. diffuse maps
