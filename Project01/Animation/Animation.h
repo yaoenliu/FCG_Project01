@@ -13,8 +13,8 @@ private:
             jointState &endJoint =  end.jointMap[name];
 
             outPutState.jointMap[name] = jointState(glm::mix(startJoint.translation, endJoint.translation, progression),
-                    glm::eulerAngles(glm::slerp(glm::quat(startJoint.rotation), glm::quat(endJoint.rotation), progression)),
-                    glm::mix(startJoint.scale, endJoint.scale, progression));
+                glm::degrees(glm::eulerAngles(glm::slerp(glm::quat(glm::radians(startJoint.rotation)), glm::quat(glm::radians(endJoint.rotation)), progression))),
+                glm::mix(startJoint.scale, endJoint.scale, progression));
         }
         return outPutState;
     }
@@ -49,5 +49,10 @@ public:
             startFrame = frame;
         }
         return modelState();
+    }
+
+    void endWithLastFrame()
+    {
+        duration = keyFrames.back().time;
     }
 };

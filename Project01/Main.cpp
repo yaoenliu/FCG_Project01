@@ -186,13 +186,11 @@ int main()
 	Model androidBot("robot.obj");
 	androidBot.setShader(&ourShader);
 
-	glm::vec3 normal = glm::vec3(0.0f, 0.0f, -1.0f);
-	float degree = 0.0f;
-
 	// make animation
+	float frameTime = 0.0f;
 	androidBot.setMode(playMode::stop);
 
-	fstream saved(".\\robotAnimation.txt", ios::in);
+	fstream saved(".\\basicAnimation.txt", ios::in);
 	androidBot.addAnimation(saved);
 	saved.close();
 
@@ -265,7 +263,6 @@ int main()
 		ImGui::Begin("Hello, world!");
 		static float f = 0.1f;
 		ImGui::SliderFloat("Scale", &f, 0.1f, 0.3f);
-		androidBot.jointMesh["Body"]->joint.translation = glm::vec3(0.0f, 0.0f, 0.0f);
 		ImGui::ColorEdit3("color", glm::value_ptr(color));
 		const char** jointItems = new const char* [androidBot.joints.size()];
 		for (size_t i = 0; i < androidBot.joints.size(); i++) {
@@ -276,29 +273,55 @@ int main()
 
 		ImGui::Text("Translation");
 		ImGui::SameLine();
-
 		if (ImGui::Button("reset translation"))
 			slectedJoint.translation = glm::vec3(0.0f);
 		ImGui::SliderFloat("posx", &slectedJoint.translation.x, -10.0f, 10.0f);
 		ImGui::SliderFloat("posy", &slectedJoint.translation.y, -10.0f, 10.0f);
 		ImGui::SliderFloat("posz", &slectedJoint.translation.z, -10.0f, 10.0f);
-		ImGui::Text("scale");
-		ImGui::SameLine();
 
+		ImGui::Text("Scale");
+		ImGui::SameLine();
 		if (ImGui::Button("reset scale"))
 			slectedJoint.scale = glm::vec3(1.0f);
 		ImGui::SliderFloat("sclx", &slectedJoint.scale.x, 0.2f, 5.0f);
 		ImGui::SliderFloat("scly", &slectedJoint.scale.y, 0.2f, 5.0f);
 		ImGui::SliderFloat("sclz", &slectedJoint.scale.z, 0.2f, 5.0f);
-		ImGui::Text("rotation");
-		ImGui::SameLine();
 
+		ImGui::Text("Rotation");
+		ImGui::SameLine();
 		if (ImGui::Button("reset rotation"))
 			slectedJoint.rotation = glm::vec3(0.0f);
 		ImGui::SliderFloat("rotx", &slectedJoint.rotation.x, -180.0f, 180.0f);
 		ImGui::SliderFloat("roty", &slectedJoint.rotation.y, -180.0f, 180.0f);
 		ImGui::SliderFloat("rotz", &slectedJoint.rotation.z, -180.0f, 180.0f);
 
+		ImGui::InputFloat("Input Frame Time", &frameTime);
+		ImGui::SameLine();
+		if (ImGui::Button("Add to key frame"))
+		{
+			androidBot.addKeyFrame(0, frameTime);
+			androidBot.animations[0].endWithLastFrame();
+		}
+
+		if (ImGui::Button("Change display mode"))
+			androidBot.playMode = androidBot.playMode == playMode::stop ? playMode::once : playMode::stop;
+
+		char buffer[256] = ".\\robotAnimation.txt";
+		ImGui::InputText("path", buffer, 256);
+
+		if (ImGui::Button("Load animation"))
+		{
+			saved.open(buffer, ios::in);
+			androidBot.loadAnimation(saved, 0);
+			saved.close();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Save animation"))
+		{
+			saved.open(buffer, ios::out);
+			androidBot.saveAnimation(saved,0);
+			saved.close();
+		}
 
 		// Random Color Button
 		if (ImGui::Button("Random Color"))
