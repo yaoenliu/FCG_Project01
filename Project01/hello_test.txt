@@ -1,128 +1,4 @@
 3
-0
-LUpArm
-0 0 0
-0 0 0
-1 1 1
-RWrist
-0 0 0
-0 0 0
-1 1 1
-LLoArm
-0 0 0
-0 0 0
-1 1 1
-All
-0 0 0
-0 0 0
-0.005 0.005 0.005
-RUpLeg
-0 0 0
-0 0 0
-1 1 1
-UpBody
-0 0 0
-0 0 0
-1 1 1
-RUpArm
-0 0 0
-0 0 0
-1 1 1
-LWrist
-0 0 0
-0 0 0
-1 1 1
-RLoArm
-0 0 0
-0 0 0
-1 1 1
-Hend
-0 0 0
-0 0 0
-1 1 1
-RLoLeg
-0 0 0
-0 0 0
-1 1 1
-RAnkle
-0 0 0
-0 0 0
-1 1 1
-LUpLeg
-0 0 0
-0 0 0
-1 1 1
-LLoLeg
-0 0 0
-0 0 0
-1 1 1
-LAnkle
-0 0 0
-0 0 0
-1 1 1
-endFrame
-1
-LUpArm
-0 0 0
-0 0 0
-1 1 1
-RWrist
-0 0 0
-0 0 0
-1 1 1
-LLoArm
-0 0 0
-0 0 0
-1 1 1
-All
-0 0 0
-0 120.405 0
-0.005 0.005 0.005
-RUpLeg
-0 0 0
-0 0 0
-1 1 1
-UpBody
-0 0 0
-0 0 0
-1 1 1
-RUpArm
-0 0 0
-0 0 0
-1 1 1
-LWrist
-0 0 0
-0 0 0
-1 1 1
-RLoArm
-0 0 0
-0 0 0
-1 1 1
-Hend
-0 0 0
-0 0 0
-1 1 1
-RLoLeg
-0 0 0
-0 0 0
-1 1 1
-RAnkle
-0 0 0
-0 0 0
-1 1 1
-LUpLeg
-0 0 0
-0 0 0
-1 1 1
-LLoLeg
-0 0 0
-0 0 0
-1 1 1
-LAnkle
-0 0 0
-0 0 0
-1 1 1
-endFrame
 2
 LUpArm
 0 0 0
@@ -136,10 +12,6 @@ LLoArm
 0 0 0
 0 0 0
 1 1 1
-All
-0 0 0
-0 -120.406 0
-0.005 0.005 0.005
 RUpLeg
 0 0 0
 0 0 0
@@ -148,15 +20,19 @@ UpBody
 0 0 0
 0 0 0
 1 1 1
+All
+0 0 0
+0 -120.406 0
+0.005 0.005 0.005
 RUpArm
 0 0 0
 0 0 0
 1 1 1
-LWrist
+RLoArm
 0 0 0
 0 0 0
 1 1 1
-RLoArm
+LWrist
 0 0 0
 0 0 0
 1 1 1
@@ -172,11 +48,11 @@ RAnkle
 0 0 0
 0 0 0
 1 1 1
-LUpLeg
+LLoLeg
 0 0 0
 0 0 0
 1 1 1
-LLoLeg
+LUpLeg
 0 0 0
 0 0 0
 1 1 1
@@ -198,10 +74,6 @@ LLoArm
 0 0 0
 0 0 0
 1 1 1
-All
-0 0 0
-0 0 0
-0.005 0.005 0.005
 RUpLeg
 0 0 0
 0 0 0
@@ -210,15 +82,19 @@ UpBody
 0 0 0
 0 0 0
 1 1 1
+All
+0 0 0
+0 0 0
+0.005 0.005 0.005
 RUpArm
 0 0 0
 0 0 0
 1 1 1
-LWrist
+RLoArm
 0 0 0
 0 0 0
 1 1 1
-RLoArm
+LWrist
 0 0 0
 0 0 0
 1 1 1
@@ -234,11 +110,11 @@ RAnkle
 0 0 0
 0 0 0
 1 1 1
-LUpLeg
+LLoLeg
 0 0 0
 0 0 0
 1 1 1
-LLoLeg
+LUpLeg
 0 0 0
 0 0 0
 1 1 1
