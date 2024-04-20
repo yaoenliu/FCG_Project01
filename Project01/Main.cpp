@@ -309,7 +309,7 @@ int main()
 		}
 
 		ImGui::Text("Save and Load");
-		char buffer[256] = ".\\robotAnimation.txt";
+		static char buffer[256] = ".\\robotAnimation.txt";
 		ImGui::InputText("path", buffer, 256);
 
 		if (ImGui::Button("Load animation"))
