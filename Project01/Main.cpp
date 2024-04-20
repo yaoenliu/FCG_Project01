@@ -275,9 +275,9 @@ int main()
 		ImGui::SameLine();
 		if (ImGui::Button("reset translation"))
 			slectedJoint.translation = glm::vec3(0.0f);
-		ImGui::SliderFloat("posx", &slectedJoint.translation.x, -10.0f, 10.0f);
-		ImGui::SliderFloat("posy", &slectedJoint.translation.y, -10.0f, 10.0f);
-		ImGui::SliderFloat("posz", &slectedJoint.translation.z, -10.0f, 10.0f);
+		ImGui::SliderFloat("posx", &slectedJoint.translation.x, -50.0f, 50.0f);
+		ImGui::SliderFloat("posy", &slectedJoint.translation.y, -50.0f, 50.0f);
+		ImGui::SliderFloat("posz", &slectedJoint.translation.z, -50.0f, 50.0f);
 
 		ImGui::Text("Scale");
 		ImGui::SameLine();

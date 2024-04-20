@@ -392,6 +392,12 @@ modelState Model::getModelState()
 void Model::addKeyFrame(const int& animationIndex, const float& time)
 {
 	animations[animationIndex].keyFrames.push_back(keyFrame(getModelState(), time));
+	sort(animations[animationIndex].keyFrames.begin(), animations[animationIndex].keyFrames.end(), 
+		[](keyFrame a, keyFrame b)
+		{
+			return a.time < b.time;
+		}
+		);
 }
 
 
