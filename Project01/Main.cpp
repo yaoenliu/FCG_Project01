@@ -196,12 +196,7 @@ int main()
 	saved.open(".\\animationFile\\puuAnimation.txt", ios::in);
 	androidBot.addAnimation(saved);
 	saved.close();
-	saved.open(".\\walkAnimation.txt", ios::in);
-	androidBot.addAnimation(saved);
-	saved.close();
-	saved.open(".\\puuAnimation.txt", ios::in);
-	androidBot.addAnimation(saved);
-	saved.close();
+
 	// setup imgui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
