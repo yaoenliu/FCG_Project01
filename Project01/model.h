@@ -32,8 +32,11 @@ enum playMode
 	once = 0,
 	loop = 1,
 	loopAll = 2,
-	stop = 3
+	stop = 3,
+	dev = 4
 };
+
+vector<string>playModeStr = { "once", "loop", "loopAll", "stop", "dev" };
 
 unsigned int TextureFromFile(const char* path, const string& directory, bool gamma = false);
 
@@ -72,7 +75,7 @@ public:
 	modelState getModelState();
 	void reposition();
 	float playTime;
-
+	int curIndex = 0;
 private:
 	unordered_map<string, meshNode*> nodeMap;
 	// loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
@@ -86,7 +89,7 @@ private:
 	vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName);
 	Shader* shader;
 	// animation data
-	int curIndex;
+
 	float lastUpdate;
 	void AnimatorUpdate();
 };
@@ -392,47 +395,62 @@ modelState Model::getModelState()
 void Model::addKeyFrame(const int& animationIndex, const float& time)
 {
 	animations[animationIndex].keyFrames.push_back(keyFrame(getModelState(), time));
-	sort(animations[animationIndex].keyFrames.begin(), animations[animationIndex].keyFrames.end(), 
+	sort(animations[animationIndex].keyFrames.begin(), animations[animationIndex].keyFrames.end(),
 		[](keyFrame a, keyFrame b)
 		{
 			return a.time < b.time;
 		}
-		);
+	);
 }
 
 
 void Model::AnimatorUpdate()
 {
 	float curTime = glfwGetTime();
-	if (animations.empty())
-		return;
 	if (playMode == stop)
 	{
 		lastUpdate = curTime;
 		return;
 	}
-
+	if (animations.empty()) // no animation[0] or no keyFrame[0
+	{
+		playMode = stop;
+		return;
+	}
 	float deltaTime = curTime - lastUpdate;
-	if (deltaTime < 0)                      // open windows too lDong
+	if (deltaTime < 0) // open windows too lDong
 	{
 		lastUpdate = curTime;
 		return;
 	}
-	playTime += deltaTime;
-
+	if (playMode != dev)
+	{
+		playTime += deltaTime;
+	}	
 	Animation& curAnimation = animations[curIndex];
+	if (curAnimation.keyFrames.empty())     // no keyFrame[0]
+	{
+		curIndex++;
+	}
 	if (playTime > curAnimation.duration)   // next animation
 	{
 		playTime = 0;
-		if (playMode == loop)
+		if (playMode == once)
+		{
+			playMode = stop;
+		}
+		if (playMode == loopAll)
+		{
 			curIndex++;
+		}
 	}
 	if (curIndex >= animations.size())      // out of stack
 	{
 		playTime = 0;
-		if (playMode == loop)
+		if (playMode == loopAll)
 		{
 			curIndex = 0;
+			return;
 		}
 		else
 		{
@@ -454,7 +472,7 @@ void Model::addNewAnimeation(const float& duration)
 void Model::saveAnimation(fstream& fout, const int& animationIndex)
 {
 	Animation& animation = animations[animationIndex];
-
+	fout << animation.name << "\n";
 	fout << animation.duration << "\n";
 	for (const auto& frame : animation.keyFrames)
 	{
@@ -471,10 +489,13 @@ void Model::saveAnimation(fstream& fout, const int& animationIndex)
 
 void Model::loadAnimation(fstream& fin, const int& animationIndex)
 {
+
 	Animation& animation = animations[animationIndex];
 	string strIn = "";
 
 	animation.reset();
+	std::getline(fin, strIn);
+	animation.name = strIn;
 	std::getline(fin, strIn);
 	animation.duration = std::stof(strIn);
 	while (std::getline(fin, strIn))
@@ -494,6 +515,8 @@ void Model::addAnimation(fstream& fin)
 	string strIn = "";
 
 	animation.reset();
+	std::getline(fin, strIn);
+	animation.name = strIn;
 	std::getline(fin, strIn);
 	animation.duration = std::stof(strIn);
 	while (std::getline(fin, strIn))

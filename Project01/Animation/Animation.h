@@ -20,6 +20,7 @@ private:
     }
 
 public:
+    string name = "unnamed";
     std::vector<keyFrame> keyFrames;
     float duration;
 
@@ -34,6 +35,11 @@ public:
     {
 
     }
+
+    Animation(string name, float duration) : name(name), duration(duration)
+    {
+
+	}
 
     modelState update(float aniTime)
     {
