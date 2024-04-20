@@ -139,21 +139,6 @@ int main()
 
 	// Set the shader program
 	sceneShaderProgram = LoadShaders(shaders);
-	// Create the ground object
-	Object ground;
-	ground.Init(sceneShaderProgram);
-	ground.pushVertex(glm::vec3(200.0f, 0.0f, 200.0f));
-	ground.pushVertex(glm::vec3(-200.0f, 0.0f, 200.0f));
-	ground.pushVertex(glm::vec3(200.0f, 0.0f, -200.0f));
-	ground.pushVertex(glm::vec3(-200.0f, 0.0f, -200.0f));
-	ground.pushVertex(glm::vec3(200.0f, 0.0f, -200.0f));
-	ground.pushVertex(glm::vec3(-200.0f, 0.0f, 200.0f));
-	ground.setPosition(position);
-
-
-	// tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
-	//stbi_set_flip_vertically_on_load(true);
-
 
 	// configure global opengl state
 	glEnable(GL_DEPTH_TEST);
@@ -196,7 +181,6 @@ int main()
 	saved.close();
 
 	// setup imgui
-	// -----------
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	io = ImGui::GetIO(); (void)io;
@@ -209,15 +193,12 @@ int main()
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(window))
 	{
-		//cameaMove();
-
 		// Render here
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glDepthMask(GL_FALSE);// Remember to turn depth writing off
 		skyboxShader.use();
-
 
 		skyboxShader.setMat4("projection", proj);
 		skyboxShader.setMat4("view", glm::mat4(glm::mat3(view)));
@@ -240,8 +221,6 @@ int main()
 		// render the loaded model
 		androidBot.setScale(0.1f);
 		androidBot.Draw();
-
-		//ourAnimator.update((float)glfwGetTime());
 
 		ourShader.setVec3("viewPos", position);
 		ourShader.setVec3("light.position", -50, 100, -50);
@@ -439,7 +418,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	view = glm::lookAt(cameraPos, // camera position
 		glm::vec3(0.0f, 0.4f, 0.0f), // target position
 		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
-	// reset the last position
 
 	lastX = xpos;
 	lastY = ypos;
@@ -468,7 +446,6 @@ GLuint loadCubemap(vector<const GLchar*> faces)
 {
 	GLuint textureID;
 	glGenTextures(1, &textureID);
-	//glActiveTexture(GL_TEXTURE0);
 
 	int width, height;
 	unsigned char* image;
