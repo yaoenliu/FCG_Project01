@@ -308,6 +308,7 @@ int main()
 			if (ImGui::Button("Key Frame Delete"))
 			{
 				androidBot.animations[androidBot.curIndex].keyFrames.erase(androidBot.animations[androidBot.curIndex].keyFrames.begin() + selectedFrame);
+				androidBot.animations[androidBot.curIndex].duration = androidBot.animations[androidBot.curIndex].keyFrames[androidBot.animations[androidBot.curIndex].keyFrames.size() - 1].time;
 				selectedFrame = 0;
 			}
 			// joint control panel
@@ -415,7 +416,7 @@ int main()
 			if (ImGui::Button("Save animation"))
 			{
 				saved.open(buffer, ios::out);
-				androidBot.saveAnimation(saved, 0);
+				androidBot.saveAnimation(saved, androidBot.curIndex);
 				saved.close();
 			}
 		}

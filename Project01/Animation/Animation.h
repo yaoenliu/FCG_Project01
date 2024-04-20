@@ -45,7 +45,7 @@ public:
     {
         keyFrame startFrame = keyFrames.back();
         for (auto& frame : keyFrames) {
-            if (frame.time > aniTime) {
+            if (frame.time >= aniTime) {
                 keyFrame endFrame = frame;
 
                 float progression = (aniTime - startFrame.time) / (endFrame.time - startFrame.time);
