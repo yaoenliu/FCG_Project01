@@ -176,9 +176,11 @@ int main()
 	float frameTime = 0.0f;
 	androidBot.setMode(playMode::stop);
 
-	fstream saved(".\\basicAnimation.txt", ios::in);
+	fstream saved;
+	saved.open(".\\basicAnimation.txt", ios::in);
 	androidBot.addAnimation(saved);
 	saved.close();
+	androidBot.animations.push_back(Animation(0.0f));
 
 	// setup imgui
 	IMGUI_CHECKVERSION();
@@ -219,7 +221,7 @@ int main()
 		ourShader.setMat4("view", view);
 
 		// render the loaded model
-		androidBot.setScale(0.1f);
+		androidBot.setScale(0.005f);
 		androidBot.Draw();
 
 		ourShader.setVec3("viewPos", position);

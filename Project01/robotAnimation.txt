@@ -1,30 +1,10 @@
+3
 0
-0
-LHorn
+LUpArm
 0 0 0
 0 0 0
 1 1 1
-RUpArm
-0 0 0
-0 0 0
-1 1 1
-Head
-0 0 0
-0 0 0
-1 1 1
-Body
-0 0 0
-0 0 0
-0.1 0.1 0.1
-RLeg
-0 0 0
-0 0 0
-1 1 1
-RHorm
-0 0 0
-0 0 0
-1 1 1
-RLoArm
+RWrist
 0 0 0
 0 0 0
 1 1 1
@@ -32,37 +12,19 @@ LLoArm
 0 0 0
 0 0 0
 1 1 1
-LUpArm
+RUpLeg
 0 0 0
 0 0 0
 1 1 1
-LLeg
+UpBody
 0 0 0
 0 0 0
 1 1 1
-endFrame
-0.2
-LHorn
+All
 0 0 0
 0 0 0
-1 1 1
+0.005 0.005 0.005
 RUpArm
-0 0 0
-0 0 0
-1 1 1
-Head
-0 0 0
-0 0 0
-1 1 1
-Body
-0 0 0
-0 132.568 0
-0.1 0.1 0.1
-RLeg
-0 0 0
-0 0 0
-1 1 1
-RHorm
 0 0 0
 0 0 0
 1 1 1
@@ -70,7 +32,41 @@ RLoArm
 0 0 0
 0 0 0
 1 1 1
+LWrist
+0 0 0
+0 0 0
+1 1 1
+Hend
+0 0 0
+0 0 0
+1 1 1
+RLoLeg
+0 0 0
+0 0 0
+1 1 1
+RAnkle
+0 0 0
+0 0 0
+1 1 1
+LLoLeg
+0 0 0
+0 0 0
+1 1 1
+LUpLeg
+0 0 0
+0 0 0
+1 1 1
+LAnkle
+0 0 0
+0 0 0
+1 1 1
+endFrame
+1
 LLoArm
+0 0 0
+0 0 0
+1 1 1
+RWrist
 0 0 0
 0 0 0
 1 1 1
@@ -78,16 +74,80 @@ LUpArm
 0 0 0
 0 0 0
 1 1 1
-LLeg
+UpBody
+0 0 0
+0 0 0
+1 1 1
+RUpLeg
+0 0 0
+0 0 0
+1 1 1
+All
+0 0 0
+0 120.405 0
+0.005 0.005 0.005
+RUpArm
+0 0 0
+0 0 0
+1 1 1
+LWrist
+0 0 0
+0 0 0
+1 1 1
+RLoArm
+0 0 0
+0 0 0
+1 1 1
+Hend
+0 0 0
+0 0 0
+1 1 1
+RLoLeg
+0 0 0
+0 0 0
+1 1 1
+RAnkle
+0 0 0
+0 0 0
+1 1 1
+LUpLeg
+0 0 0
+0 0 0
+1 1 1
+LLoLeg
+0 0 0
+0 0 0
+1 1 1
+LAnkle
 0 0 0
 0 0 0
 1 1 1
 endFrame
-0.4
-LHorn
+2
+LUpArm
 0 0 0
 0 0 0
 1 1 1
+RWrist
+0 0 0
+0 0 0
+1 1 1
+LLoArm
+0 0 0
+0 0 0
+1 1 1
+RUpLeg
+0 0 0
+0 0 0
+1 1 1
+UpBody
+0 0 0
+0 0 0
+1 1 1
+All
+0 0 0
+0 -120.406 0
+0.005 0.005 0.005
 RUpArm
 0 0 0
 0 0 0
@@ -120,41 +180,45 @@ LUpArm
 0 0 0
 0 0 0
 1 1 1
-LLeg
-0 0 0
-0 0 0
-1 1 1
-endFrame
-1
-LHorn
-0 0 0
-0 0 0
-1 1 1
-RUpArm
-0 0 0
-0 0 0
-1 1 1
-Head
-0 0 0
-0 0 0
-1 1 1
-Body
-0 0 0
-0 -0 0
-0.1 0.1 0.1
-RLeg
-0 0 0
-0 0 0
-1 1 1
-RHorm
-0 0 0
-0 0 0
-1 1 1
 RLoArm
 0 0 0
 0 0 0
 1 1 1
+LWrist
+0 0 0
+0 0 0
+1 1 1
+Hend
+0 0 0
+0 0 0
+1 1 1
+RLoLeg
+0 0 0
+0 0 0
+1 1 1
+RAnkle
+0 0 0
+0 0 0
+1 1 1
+LLoLeg
+0 0 0
+0 0 0
+1 1 1
+LUpLeg
+0 0 0
+0 0 0
+1 1 1
+LAnkle
+0 0 0
+0 0 0
+1 1 1
+endFrame
+3
 LLoArm
+0 0 0
+0 0 0
+1 1 1
+RWrist
 0 0 0
 0 0 0
 1 1 1
@@ -162,33 +226,23 @@ LUpArm
 0 0 0
 0 0 0
 1 1 1
-LLeg
+UpBody
 0 0 0
 0 0 0
 1 1 1
-endFrame
-0
+RUpLeg
+0 0 0
+0 0 0
+1 1 1
+All
+0 0 0
+0 0 0
+0.005 0.005 0.005
 RUpArm
 0 0 0
 0 0 0
 1 1 1
-LHorn
-0 0 0
-0 0 0
-1 1 1
-Head
-0 0 0
-0 0 0
-1 1 1
-Body
-0 0 0
-0 0 0
-0.1 0.1 0.1
-RLeg
-0 0 0
-0 0 0
-1 1 1
-RHorm
+LWrist
 0 0 0
 0 0 0
 1 1 1
@@ -196,15 +250,27 @@ RLoArm
 0 0 0
 0 0 0
 1 1 1
-LUpArm
+Hend
 0 0 0
 0 0 0
 1 1 1
-LLoArm
+RLoLeg
 0 0 0
 0 0 0
 1 1 1
-LLeg
+RAnkle
+0 0 0
+0 0 0
+1 1 1
+LUpLeg
+0 0 0
+0 0 0
+1 1 1
+LLoLeg
+0 0 0
+0 0 0
+1 1 1
+LAnkle
 0 0 0
 0 0 0
 1 1 1
