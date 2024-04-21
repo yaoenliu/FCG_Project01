@@ -16,8 +16,7 @@
 #include "Animation\Animator.h"
 
 
-#include <bitset>
-
+// Function prototypes here
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -54,7 +53,6 @@ ShaderInfo shaders[] = {
 	{GL_FRAGMENT_SHADER, "fragmentShader.glsl"},
 	{GL_NONE, NULL}
 };
-
 
 float skyboxVertices[] = {
 	// positions          
@@ -101,7 +99,6 @@ float skyboxVertices[] = {
  1.0f, -1.0f,  1.0f
 };
 
-
 int main()
 {
 
@@ -142,7 +139,6 @@ int main()
 		return -1;
 
 	// Set the shader program
-
 	sceneShaderProgram = LoadShaders(shaders);
 
 	// configure global opengl state
@@ -492,6 +488,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 // resize callback function
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
+	if (width == 0 || height == 0)
+		return;
 	// resize the display
 	glViewport(0, 0, width, height);
 	proj = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
