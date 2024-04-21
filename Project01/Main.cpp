@@ -107,7 +107,7 @@ int main()
 		return -1;
 
 	// Create a windowed mode window and its OpenGL context
-	GLFWwindow* window = glfwCreateWindow(1920, 1080, "Hello World", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(1920, 1080, "Computer Graphics Project 1", NULL, NULL);
 	// set up the camera
 	proj = glm::perspective(glm::radians(45.0f), 1920.f / 1080.f, 0.1f, 100.0f);
 	view = glm::lookAt(
@@ -257,7 +257,7 @@ int main()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		ImGui::Begin("Hello, world!");
+		ImGui::Begin("Animation Control Panel");
 
 		// select model part
 		const char** playModeItems = new const char* [playModeStr.size()];
