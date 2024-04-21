@@ -16,7 +16,8 @@
 #include "Animation\Animator.h"
 
 
-// Function prototypes here
+#include <bitset>
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -53,6 +54,7 @@ ShaderInfo shaders[] = {
 	{GL_FRAGMENT_SHADER, "fragmentShader.glsl"},
 	{GL_NONE, NULL}
 };
+
 
 float skyboxVertices[] = {
 	// positions          
@@ -99,6 +101,7 @@ float skyboxVertices[] = {
  1.0f, -1.0f,  1.0f
 };
 
+
 int main()
 {
 
@@ -139,6 +142,7 @@ int main()
 		return -1;
 
 	// Set the shader program
+
 	sceneShaderProgram = LoadShaders(shaders);
 
 	// configure global opengl state
