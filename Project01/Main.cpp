@@ -10,17 +10,43 @@
 #include "Object.h"
 #include <fstream>
 #include <string>
+#include "shader.hpp"
+#include "model.h"
+#include "stb_image.h"
+#include "Animation\Animator.h"
+
 
 #include <bitset>
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+GLuint loadCubemap(vector<const GLchar*> faces);
 
 // camera and color variables
-glm::mat4 proj;
-glm::mat4 view;
-glm::vec4 color;
-float angle = 90.0f;
+glm::mat4 proj; // projection matrix
+glm::mat4 view; // view matrix
+glm::vec4 color; // color 
+glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f); // model position
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.3f, 3.0f); // camera position
+float speed = 0.1f; // camera speed
+float horizontal_angle = 0; // camera horizontal angle
+float vertical_angle = glm::degrees(asin(0.1)); // camera vertical angle
+float dist = 3.0f; // camera distance to the target
+
+bool keyS[4] = { false, false, false, false }; // W, A, S, D keys status
+bool mouseS[2] = { false, false }; // left and right mouse buttons status
+void cameaMove(); // camera movement function
+
+GLuint sceneShaderProgram; // scene shader program
+
+int selectedJoint = 0;
+int selectedFrame = 0;
+
+
+ImGuiIO io;
 
 // global shader info
 ShaderInfo shaders[] = {
@@ -29,33 +55,52 @@ ShaderInfo shaders[] = {
 	{GL_NONE, NULL}
 };
 
-void setCube(glm::vec3 pos, float width, float height, float depth, std::vector<glm::vec3>& vertices, std::vector<unsigned>& indice)
-{
-	int pointAmount = 8;
-	vertices.assign(pointAmount, { width, height, depth });
-	for (int i = 0; i < pointAmount; i++)
-	{
-		std::string bin = std::bitset<3>(i).to_string();
-		vertices[i].x = pos.x + vertices[i].x * (bin[0] - '0');
-		vertices[i].y = pos.y - vertices[i].y * (bin[1] - '0');
-		vertices[i].z = pos.z + vertices[i].z * (bin[2] - '0');
-	}
 
-	indice = {
-		0,1,2,
-		3,2,1,
-		6,5,4,
-		5,6,7,
-		5,3,1,
-		3,5,7,
-		0,2,4,
-		6,4,2,
-		2,3,6,
-		7,6,3,
-		1,0,4,
-		4,5,1
-	};
-}
+float skyboxVertices[] = {
+	// positions          
+-1.0f,  1.0f, -1.0f,
+-1.0f, -1.0f, -1.0f,
+ 1.0f, -1.0f, -1.0f,
+ 1.0f, -1.0f, -1.0f,
+ 1.0f,  1.0f, -1.0f,
+-1.0f,  1.0f, -1.0f,
+
+-1.0f, -1.0f,  1.0f,
+-1.0f, -1.0f, -1.0f,
+-1.0f,  1.0f, -1.0f,
+-1.0f,  1.0f, -1.0f,
+-1.0f,  1.0f,  1.0f,
+-1.0f, -1.0f,  1.0f,
+
+ 1.0f, -1.0f, -1.0f,
+ 1.0f, -1.0f,  1.0f,
+ 1.0f,  1.0f,  1.0f,
+ 1.0f,  1.0f,  1.0f,
+ 1.0f,  1.0f, -1.0f,
+ 1.0f, -1.0f, -1.0f,
+
+-1.0f, -1.0f,  1.0f,
+-1.0f,  1.0f,  1.0f,
+ 1.0f,  1.0f,  1.0f,
+ 1.0f,  1.0f,  1.0f,
+ 1.0f, -1.0f,  1.0f,
+-1.0f, -1.0f,  1.0f,
+
+-1.0f,  1.0f, -1.0f,
+ 1.0f,  1.0f, -1.0f,
+ 1.0f,  1.0f,  1.0f,
+ 1.0f,  1.0f,  1.0f,
+-1.0f,  1.0f,  1.0f,
+-1.0f,  1.0f, -1.0f,
+
+-1.0f, -1.0f, -1.0f,
+-1.0f, -1.0f,  1.0f,
+ 1.0f, -1.0f, -1.0f,
+ 1.0f, -1.0f, -1.0f,
+-1.0f, -1.0f,  1.0f,
+ 1.0f, -1.0f,  1.0f
+};
+
 
 int main()
 {
@@ -67,16 +112,14 @@ int main()
 	// Create a windowed mode window and its OpenGL context
 	GLFWwindow* window = glfwCreateWindow(1920, 1080, "Hello World", NULL, NULL);
 	// set up the camera
-	proj = glm::perspective(glm::radians(45.0f), 640.0f / 480.0f, 0.1f, 100.0f);
-	view = glm::lookAt(glm::vec3(0.0f, 2.0f, 3.0f), // camera position
-		glm::vec3(0.0f, 0.0f, 0.0f), // target position
+	proj = glm::perspective(glm::radians(45.0f), 1920.f / 1080.f, 0.1f, 100.0f);
+	view = glm::lookAt(
+		cameraPos, // camera position
+		glm::vec3(0.0f, 0.4f, 0.0f), // target position
 		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
 
-	// seed the random number generator
-	srand(time(NULL));
-
 	// set the initial color
-	color = glm::vec4(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, 1.0f);
+	color = glm::vec4(105.0 / 255, 72.0 / 255, 40.0 / 255, 1.0f);
 
 	// detect if the window wasn't created
 	if (!window)
@@ -88,66 +131,128 @@ int main()
 	// Set callback function
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
+	glfwSetScrollCallback(window, mouse_scroll_callback);
 
 	// Make the window's context current
 	glfwMakeContextCurrent(window);
-
 	// Initialize GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		return -1;
 
 	// Set the shader program
-	GLuint shaderProgram = LoadShaders(shaders);
-	// Use the shader program
-	glUseProgram(shaderProgram);
 
-	std::vector<glm::vec3> vertices, colors(8, glm::vec3(0.5f, 0.5f, 0.5f));
-	std::vector<unsigned> indice;
+	sceneShaderProgram = LoadShaders(shaders);
 
-	setCube(glm::vec3(-0.25f, 0.0f, -0.25), 0.5f, 1.0f, 0.5f, vertices, indice);
+	// configure global opengl state
+	glEnable(GL_DEPTH_TEST);
 
-	Object *hand = new Object(), * obj = new Object(), * cur = hand;
-	cur->Init(shaderProgram, vertices, colors, indice);
+	// Setup skybox VAO
+	GLuint skyboxVAO, skyboxVBO;
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glBindVertexArray(0);
 
-	obj->Init(shaderProgram, vertices, colors, indice);
-	obj->setTranslate(glm::vec3(0.0f, -1.0f, 0.0f));
-	cur->childrens.push_back(obj);
-	cur = obj;
+	// Cubemap (Skybox)
+	vector<const GLchar*> faces;
+	faces.push_back("skybox/right.jpg");
+	faces.push_back("skybox/left.jpg");
+	faces.push_back("skybox/top.jpg");
+	faces.push_back("skybox/bottom.jpg");
+	faces.push_back("skybox/back.jpg");
+	faces.push_back("skybox/front.jpg");
+	GLuint cubemapTexture = loadCubemap(faces);
 
-	for (int i = 0; i < 3; i++)
-	{
-		setCube(glm::vec3(-0.05f, 0.0f, -0.05), 0.1f, 0.2f, 0.1f, vertices, indice);
-		obj = new Object();
-		obj->Init(shaderProgram, vertices, colors, indice);
-		obj->setTranslate(glm::vec3(-0.25f, -1.0f, 0.25f - 0.05 - 0.2 * i));
-		cur->childrens.push_back(obj);
-	}
+	Shader skyboxShader("SkyboxVertexShader.glsl", "SkyboxFragmentShader.glsl");
 
+	Shader ourShader("RobotVertexShader.glsl", "RobotFragmentShader.glsl");
+
+	// load models
+	Model androidBot("robot.obj");
+	androidBot.setShader(&ourShader);
+
+	// make animation
+	float frameTime = 0.0f;
+	androidBot.setMode(playMode::stop);
+
+	fstream saved;
+	saved.open(".\\animationFile\\basicAnimation.txt", ios::in);
+	androidBot.addAnimation(saved);
+	saved.close();
+	saved.open(".\\animationFile\\walkAnimation.txt", ios::in);
+	androidBot.addAnimation(saved);
+	saved.close();
+	saved.open(".\\animationFile\\jumping_jacks_v2.txt", ios::in);
+	androidBot.addAnimation(saved);
+	saved.close();
+	saved.open(".\\animationFile\\squatAnimation.txt", ios::in);
+	androidBot.addAnimation(saved);
+	saved.close();
+	saved.open(".\\animationFile\\Kame_Hame_Ha.txt", ios::in);
+	androidBot.addAnimation(saved);
+	saved.close();
+	saved.open(".\\animationFile\\puuAnimation.txt", ios::in);
+	androidBot.addAnimation(saved);
+	saved.close();
 
 	// setup imgui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	ImGui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	// Setup Platform/Renderer bindings
 	ImGui_ImplOpenGL3_Init("#version 330");
 
-
-
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(window))
 	{
-
 		// Render here
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "lookMatrix"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projectMatrix"), 1, GL_FALSE, glm::value_ptr(proj));
+		glDepthMask(GL_FALSE);// Remember to turn depth writing off
+		skyboxShader.use();
 
-		obj->Draw(glm::mat4(1));
+		skyboxShader.setMat4("projection", proj);
+		skyboxShader.setMat4("view", glm::mat4(glm::mat3(view)));
 
+		glBindVertexArray(skyboxVAO);
+		glActiveTexture(GL_TEXTURE0);
+		skyboxShader.setInt("skybox", 0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+		glDepthMask(GL_TRUE);
+
+		// switch to the model shader
+		ourShader.use();
+
+		// binding the uniform matrix view and projection
+		ourShader.setMat4("projection", proj);
+		ourShader.setMat4("view", view);
+
+		// render the loaded model
+		androidBot.setScale(0.005f);
+		androidBot.Draw();
+
+		ourShader.setVec3("viewPos", position);
+		ourShader.setVec3("light.position", -50, 100, -50);
+		ourShader.setVec3("light.ambient", 0.1, 0.6, 0.1);
+		ourShader.setVec3("light.diffuse", 5, 5, 5);
+		ourShader.setVec3("light.specular", 0, 0, 0);
+
+		// Scene part
+		// switch back to the Scene shader
+		glUseProgram(sceneShaderProgram);
+		// draw the scene
 		// Poll for and process events
 		glfwPollEvents();
 
@@ -157,25 +262,172 @@ int main()
 		ImGui::NewFrame();
 
 		ImGui::Begin("Hello, world!");
-		ImGui::SetWindowSize(ImVec2(480, 270));
-		ImGui::Text("This is some useful text.");
-		// a slider for changing the rotation angle
-		ImGui::SliderFloat("angle", &angle, -179.0f, 179.0f);
-		if (angle == 0.0f) // make sure the triangle is always visible
-			angle = 0.1f;
-		view = glm::lookAt(glm::vec3(3 * cos(glm::radians(angle)), 2.0f, 3 * sin(glm::radians(angle))), // camera position
-			glm::vec3(0.0f, 0.0f, 0.0f), // target position
-			glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
-		ImGui::ColorEdit3("color", &color[0]);
 
-		// Random Color Button
-		if (ImGui::Button("Random Color"))
+		// select model part
+		const char** playModeItems = new const char* [playModeStr.size()];
+		for (size_t i = 0; i < playModeStr.size(); i++) {
+			playModeItems[i] = playModeStr[i].c_str();
+		}
+		ImGui::Combo("Play Mode", &androidBot.playMode, playModeItems, playModeStr.size());
+		if (androidBot.playMode == stop)
 		{
-			color = glm::vec4(rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, rand() / (float)RAND_MAX, 1.0f);
+			ImGui::SameLine();
+			if (ImGui::Button("Replay"))
+			{
+				androidBot.setMode(playMode::once);
+			}
+		}
+		// select animation part
+		const char** aniItems = new const char* [androidBot.animations.size()];
+		for (size_t i = 0; i < androidBot.animations.size(); i++) {
+			aniItems[i] = androidBot.animations[i].name.c_str();
+		}
+		ImGui::Combo("Animation", &androidBot.curIndex, aniItems, androidBot.animations.size());
+
+		if (androidBot.playMode == dev)
+		{
+			// select joint part
+			const char** jointItems = new const char* [androidBot.joints.size()];
+			for (size_t i = 0; i < androidBot.joints.size(); i++) {
+				jointItems[i] = androidBot.joints[i].c_str();
+			}
+			ImGui::Combo("Joint", &selectedJoint, jointItems, androidBot.joints.size());
+			jointState& slectedJoint = androidBot.jointMesh[androidBot.joints[selectedJoint]]->joint;
+
+
+			// select key frame part
+			const char** frameItems = new const char* [androidBot.animations[androidBot.curIndex].keyFrames.size()];
+			for (size_t i = 0; i < androidBot.animations[androidBot.curIndex].keyFrames.size(); i++) {
+				std::string str = std::to_string(androidBot.animations[androidBot.curIndex].keyFrames[i].time);
+				char* cstr = new char[str.length() + 1];
+				strcpy_s(cstr, str.length() + 1, str.c_str());
+				frameItems[i] = cstr;
+			}
+			ImGui::Combo("Frame", &selectedFrame, frameItems, androidBot.animations[androidBot.curIndex].keyFrames.size());
+			if (androidBot.playMode == dev)
+			{
+				androidBot.playTime = androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].time;
+			}
+			// delete frame button
+			if (ImGui::Button("Key Frame Delete"))
+			{
+				androidBot.animations[androidBot.curIndex].keyFrames.erase(androidBot.animations[androidBot.curIndex].keyFrames.begin() + selectedFrame);
+				androidBot.animations[androidBot.curIndex].duration = androidBot.animations[androidBot.curIndex].keyFrames[androidBot.animations[androidBot.curIndex].keyFrames.size() - 1].time;
+				selectedFrame = 0;
+			}
+			// joint control panel
+			ImGui::Text("Translation");
+			ImGui::SameLine();
+			if (ImGui::Button("reset translation"))
+				androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].translation = glm::vec3(0.0f);
+			ImGui::SliderFloat("posx", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].translation.x, -50.0f, 50.0f);
+			ImGui::SliderFloat("posy", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].translation.y, -50.0f, 50.0f);
+			ImGui::SliderFloat("posz", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].translation.z, -50.0f, 50.0f);
+
+			ImGui::Text("Scale");
+			ImGui::SameLine();
+			if (ImGui::Button("reset scale"))
+				androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].scale = glm::vec3(1.0f);
+			ImGui::SliderFloat("sclx", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].scale.x, 0.2f, 5.0f);
+			ImGui::SliderFloat("scly", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].scale.y, 0.2f, 5.0f);
+			ImGui::SliderFloat("sclz", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].scale.z, 0.2f, 5.0f);
+
+			ImGui::Text("Rotation");
+			ImGui::SameLine();
+			if (ImGui::Button("reset rotation"))
+				androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].rotation = glm::vec3(0.0f);
+			ImGui::SliderFloat("rotx", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].rotation.x, -180.0f, 180.0f);
+			ImGui::SliderFloat("roty", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].rotation.y, -180.0f, 180.0f);
+			ImGui::SliderFloat("rotz", &androidBot.animations[androidBot.curIndex].keyFrames[selectedFrame].state.jointMap[androidBot.joints[selectedJoint]].rotation.z, -180.0f, 180.0f);
+		}
+
+		ImGui::Text("Animation seek bar");
+		ImGui::SliderFloat("time", &androidBot.playTime, 0, androidBot.animations[androidBot.curIndex].duration);
+		if (androidBot.playMode == dev)
+		{
+			int closestFrame = 0;
+			float closestTime = 100;
+			for (int i = 0; i < androidBot.animations[androidBot.curIndex].keyFrames.size(); i++)
+			{
+				float temp = abs(androidBot.animations[androidBot.curIndex].keyFrames[i].time - androidBot.playTime);
+				if (temp < closestTime)
+				{
+					closestTime = temp;
+					closestFrame = i;
+				}
+			}
+			selectedFrame = closestFrame;
+			androidBot.playTime = androidBot.animations[androidBot.curIndex].keyFrames[closestFrame].time;
+
+			// add key frame button
+			static bool addKeyFramePopup = false;
+			if (ImGui::Button("Key Frame Add"))
+			{
+				addKeyFramePopup = true;
+			}
+			if (addKeyFramePopup)
+			{
+				ImGui::OpenPopup("Add Animation");
+				if (ImGui::BeginPopupModal("Add Animation", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+					static float frameTime = 0.0f;
+					ImGui::InputFloat("frameTime at:", &frameTime);
+					if (ImGui::Button("Add"))
+					{
+						androidBot.addKeyFrame(androidBot.curIndex, frameTime);
+						androidBot.animations[androidBot.curIndex].endWithLastFrame();
+						addKeyFramePopup = false;
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::EndPopup();
+				}
+			}
+			// add animation button
+			static bool addAnimationPopup = false;
+			if (ImGui::Button("Add Animation"))
+			{
+				addAnimationPopup = true;
+			}
+			if (addAnimationPopup)
+			{
+				ImGui::OpenPopup("Add Animation");
+				if (ImGui::BeginPopupModal("Add Animation", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+					static char aniName[256] = "unnamed";
+					static float aniDuration = 0.0f;
+					ImGui::InputText("name", aniName, 256);
+					ImGui::InputFloat("duration", &aniDuration);
+					if (ImGui::Button("Add"))
+					{
+						androidBot.animations.push_back(Animation(aniName, aniDuration));
+						androidBot.addKeyFrame(androidBot.animations.size()-1, 0);
+						androidBot.animations[androidBot.animations.size() - 1].endWithLastFrame();
+						addAnimationPopup = false;
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::EndPopup();
+				}
+			}
+			ImGui::Text("Save and Load");
+			static char buffer[256] = ".\\robotAnimation.txt";
+			ImGui::InputText("path", buffer, 256);
+
+			if (ImGui::Button("Load animation"))
+			{
+				saved.open(buffer, ios::in);
+				androidBot.loadAnimation(saved, androidBot.curIndex);
+				saved.close();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Save animation"))
+			{
+				saved.open(buffer, ios::out);
+				androidBot.saveAnimation(saved, androidBot.curIndex);
+				saved.close();
+			}
 		}
 		// Show FPS
 		ImGui::Text(" frame generated in %.3f ms\n FPS: %.1f", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
+		// quit button
 		if (ImGui::Button("Quit"))
 		{
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
@@ -197,8 +449,44 @@ int main()
 // key callback function
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+	static int windowWidth, windowHeight, windowPosX, windowPosY;
+	static bool isFullScreen = false;
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, GLFW_TRUE);
+		if (isFullScreen)
+		{
+			glfwSetWindowMonitor(window, NULL, windowPosX, windowPosY, windowWidth, windowHeight, GLFW_DONT_CARE);
+			isFullScreen = false;
+		}
+		else
+			glfwSetWindowShouldClose(window, GLFW_TRUE);
+
+	if (key == GLFW_KEY_F && action == GLFW_PRESS)
+	{
+		static int windowWidth, windowHeight, windowPosX, windowPosY;
+		if (isFullScreen)
+		{
+			glfwSetWindowMonitor(window, NULL, windowPosX, windowPosY, windowWidth, windowHeight, GLFW_DONT_CARE);
+			isFullScreen = false;
+		}
+		else
+		{
+			glfwGetWindowPos(window, &windowPosX, &windowPosY);
+			glfwGetWindowSize(window, &windowWidth, &windowHeight);
+			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+			glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, GLFW_DONT_CARE);
+			isFullScreen = true;
+		}
+	}
+
+	if (key == GLFW_KEY_W)
+		keyS[0] = action == GLFW_RELEASE ? false : true;
+	if (key == GLFW_KEY_A)
+		keyS[1] = action == GLFW_RELEASE ? false : true;
+	if (key == GLFW_KEY_S)
+		keyS[2] = action == GLFW_RELEASE ? false : true;
+	if (key == GLFW_KEY_D)
+		keyS[3] = action == GLFW_RELEASE ? false : true;
 }
 
 // resize callback function
@@ -209,4 +497,99 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	proj = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
 }
 
+void cameaMove()
+{
+	if (keyS[0])
+		cameraPos.z -= 0.1f;
+	if (keyS[1])
+		cameraPos.x -= 0.1f;
+	if (keyS[2])
+		cameraPos.z += 0.1f;
+	if (keyS[3])
+		cameraPos.x += 0.1f;
+	view = glm::lookAt(cameraPos, // camera position
+		glm::vec3(0.0f, 0.4f, 0.0f), // target position
+		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
+}
 
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	static double lastX = xpos;
+	static double lastY = ypos;
+
+	if (!mouseS[0])
+	{
+		lastX = xpos;
+		lastY = ypos;
+		return;
+	}
+	if (ImGui::GetIO().WantCaptureMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		return;
+	}
+	horizontal_angle += speed * (lastX - xpos);
+	vertical_angle -= speed * (lastY - ypos);
+	if (sin(glm::radians(vertical_angle)) < 0.1)vertical_angle = glm::degrees(asin(0.1));
+	if (horizontal_angle > 360)horizontal_angle -= 360;
+	if (horizontal_angle < 0)horizontal_angle += 360;
+	if (vertical_angle > 89)vertical_angle = 89;
+	if (vertical_angle < -89)vertical_angle = -89;
+
+	cameraPos = glm::vec3(dist * cos(glm::radians(vertical_angle)) * sin(glm::radians(horizontal_angle)), dist * sin(glm::radians(vertical_angle)), dist * cos(glm::radians(vertical_angle)) * cos(glm::radians(horizontal_angle)));
+	view = glm::lookAt(cameraPos, // camera position
+		glm::vec3(0.0f, 0.4f, 0.0f), // target position
+		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
+
+	lastX = xpos;
+	lastY = ypos;
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_LEFT)
+		mouseS[0] = action == GLFW_RELEASE ? false : true;
+	if (button == GLFW_MOUSE_BUTTON_RIGHT)
+		mouseS[1] = action == GLFW_RELEASE ? false : true;
+}
+
+void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	if (ImGui::GetIO().WantCaptureMouse)
+		return;
+	dist -= 0.1 * yoffset;
+	if (dist < 1.0f)dist = 1.0f;
+	if (dist > 10.0f)dist = 10.0f;
+	cameraPos = glm::vec3(dist * cos(glm::radians(vertical_angle)) * sin(glm::radians(horizontal_angle)), dist * sin(glm::radians(vertical_angle)), dist * cos(glm::radians(vertical_angle)) * cos(glm::radians(horizontal_angle)));
+	view = glm::lookAt(cameraPos, // camera position
+		glm::vec3(0.0f, 0.4f, 0.0f), // target position
+		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
+}
+
+GLuint loadCubemap(vector<const GLchar*> faces)
+{
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height;
+	unsigned char* image;
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+	for (GLuint i = 0; i < faces.size(); i++)
+	{
+		int nrComponents;
+		image = stbi_load(faces[i], &width, &height, &nrComponents, 0);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,
+			GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		stbi_image_free(image);
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+	return textureID;
+}

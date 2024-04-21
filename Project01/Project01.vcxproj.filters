@@ -25,6 +25,9 @@
     <Filter Include="Object">
       <UniqueIdentifier>{d51ebedf-6634-4ffd-9236-0ac3c99734ed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Animation">
+      <UniqueIdentifier>{b55f5572-fb0f-4596-abab-623ec6b0ad1c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -57,6 +60,18 @@
     <ClCompile Include="..\LoadShaders\LoadShaders.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
+    <ClCompile Include="meshNode.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="modelState.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Animator.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="jointState.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="FragmentShader.glsl">
@@ -65,6 +80,14 @@
     <None Include="VertexShader.glsl">
       <Filter>Shader</Filter>
     </None>
+    <None Include="RobotVertexShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="RobotFragmentShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="SkyboxFragmentShader.glsl" />
+    <None Include="SkyboxVertexShader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\imgui-1.90.4\imconfig.h">
@@ -100,8 +123,35 @@
     <ClInclude Include="Object.h">
       <Filter>Object</Filter>
     </ClInclude>
-    <ClInclude Include="animetor.h">
-      <Filter>Object</Filter>
+    <ClInclude Include="mesh.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="shader.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="meshNode.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="modelState.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Animation.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Animator.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\keyFrame.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="jointState.h">
+      <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
