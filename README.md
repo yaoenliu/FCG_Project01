@@ -10,4 +10,4 @@ CS2902701 基礎電腦圖學實習 Project 01
 2. [glfw](https://www.glfw.org/)
 3. [glm](https://github.com/g-truc/glm)
 4. [Dear ImGui](https://github.com/ocornut/imgui)
-5. [assinp](https://github.com/assimp/assimp)
+5. [assimp](https://github.com/assimp/assimp)
