@@ -49,8 +49,8 @@ ImGuiIO io;
 
 // global shader info
 ShaderInfo shaders[] = {
-	{GL_VERTEX_SHADER, "vertexShader.glsl"},
-	{GL_FRAGMENT_SHADER, "fragmentShader.glsl"},
+	{GL_VERTEX_SHADER, "shader/vertexShader.glsl"},
+	{GL_FRAGMENT_SHADER, "shader/fragmentShader.glsl"},
 	{GL_NONE, NULL}
 };
 
@@ -165,12 +165,12 @@ int main()
 	faces.push_back("skybox/front.jpg");
 	GLuint cubemapTexture = loadCubemap(faces);
 
-	Shader skyboxShader("SkyboxVertexShader.glsl", "SkyboxFragmentShader.glsl");
+	Shader skyboxShader("shader/SkyboxVertexShader.glsl", "shader/SkyboxFragmentShader.glsl");
 
-	Shader ourShader("RobotVertexShader.glsl", "RobotFragmentShader.glsl");
+	Shader ourShader("shader/RobotVertexShader.glsl", "shader/RobotFragmentShader.glsl");
 
 	// load models
-	Model androidBot("robot.obj");
+	Model androidBot("robot/robot.obj");
 	androidBot.setShader(&ourShader);
 
 	// make animation
