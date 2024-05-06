@@ -152,14 +152,6 @@
     <ClCompile Include="modelState.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="FragmentShader.glsl" />
-    <None Include="RobotFragmentShader.glsl" />
-    <None Include="RobotVertexShader.glsl" />
-    <None Include="SkyboxFragmentShader.glsl" />
-    <None Include="SkyboxVertexShader.glsl" />
-    <None Include="VertexShader.glsl" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\imgui-1.90.4\backends\imgui_impl_glfw.h" />
     <ClInclude Include="..\imgui-1.90.4\backends\imgui_impl_opengl3.h" />
     <ClInclude Include="..\imgui-1.90.4\imconfig.h" />
@@ -181,6 +173,14 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="stb_image.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\FragmentShader.glsl" />
+    <None Include="shader\RobotFragmentShader.glsl" />
+    <None Include="shader\RobotVertexShader.glsl" />
+    <None Include="shader\SkyboxFragmentShader.glsl" />
+    <None Include="shader\SkyboxVertexShader.glsl" />
+    <None Include="shader\VertexShader.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

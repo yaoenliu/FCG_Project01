@@ -74,22 +74,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="FragmentShader.glsl">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="VertexShader.glsl">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="RobotVertexShader.glsl">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="RobotFragmentShader.glsl">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="SkyboxFragmentShader.glsl" />
-    <None Include="SkyboxVertexShader.glsl" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\imgui-1.90.4\imconfig.h">
       <Filter>ImGui</Filter>
     </ClInclude>
@@ -153,5 +137,25 @@
     <ClInclude Include="jointState.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\FragmentShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\RobotFragmentShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\RobotVertexShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\SkyboxFragmentShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\SkyboxVertexShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\VertexShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>
