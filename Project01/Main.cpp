@@ -44,6 +44,14 @@ GLuint sceneShaderProgram; // scene shader program
 int selectedJoint = 0;
 int selectedFrame = 0;
 
+enum Environment
+{
+	normal , 
+	reflection,
+	reflectionMap,
+	refraction,
+}environment;
+
 
 ImGuiIO io;
 
@@ -237,13 +245,27 @@ int main()
 
 		// render the loaded model
 		androidBot.setScale(0.005f);
+
+
+		if (environment == normal)
+			ourShader.setInt("mapType", 0);
+		if (environment == reflection)
+			ourShader.setInt("mapType", 1);
+		if (environment == reflectionMap)
+			ourShader.setInt("mapType", 2);
+		if (environment == refraction)
+			ourShader.setInt("mapType", 3);
+
+
+		if (environment != normal)
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 		androidBot.Draw();
 
 		ourShader.setVec3("viewPos", position);
 		ourShader.setVec3("light.position", -50, 100, -50);
 		ourShader.setVec3("light.ambient", 0.1, 0.6, 0.1);
 		ourShader.setVec3("light.diffuse", 5, 5, 5);
-		ourShader.setVec3("light.specular", 0, 0, 0);
+		ourShader.setVec3("light.specular", 0, 0, 0);	
 
 		// Scene part
 		// switch back to the Scene shader
@@ -258,6 +280,10 @@ int main()
 		ImGui::NewFrame();
 
 		ImGui::Begin("Animation Control Panel");
+
+		// select map type
+		const char* mapTypeItems[] = { "normal", "reflection", "reflectionMap", "refraction" };
+		ImGui::Combo("Map Type", (int*)&environment, mapTypeItems, 4);
 
 		// select model part
 		const char** playModeItems = new const char* [playModeStr.size()];

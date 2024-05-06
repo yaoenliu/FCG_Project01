@@ -30,10 +30,13 @@ struct Light
 in vec3 FragPos;
 in vec3 Normal;
 
+uniform samplerCube skybox;
 uniform MaterialWithoutTexture materialWithoutTexture;
 uniform Light light;
 uniform vec3 viewPos;
 uniform bool hasTexture;
+uniform int mapType;
+
 
 void main() 
 {
@@ -49,6 +52,14 @@ void main()
 
     float diff = max(dot(norm, lightDir), 0.0);
     float spec;
+
+    if(mapType == 1)
+    {
+        vec3 I = normalize(FragPos - viewPos);
+        vec3 R = reflect(I, normalize(Normal));
+        FragColor = vec4(texture(skybox, R).rgb, 1.0);
+        return;
+    }
 
     if(!hasTexture) 
     {

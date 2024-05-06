@@ -82,6 +82,7 @@ public:
         setupMesh();
     }
 
+
     Mesh(vector<Vertex> vertices, vector<unsigned int> indices, Material mat)
     {
         this->vertices = vertices;
@@ -121,7 +122,6 @@ public:
             // and finally bind the texture
             glBindTexture(GL_TEXTURE_2D, textures[i].id);
         }
-
         if (textures.size() == 0)
         {
             shader.setVec3("materialWithoutTexture.ambient", mat.Ka);
