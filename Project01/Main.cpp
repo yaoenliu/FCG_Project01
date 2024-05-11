@@ -30,6 +30,8 @@ glm::mat4 view; // view matrix
 glm::vec4 color; // color 
 glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f); // model position
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.3f, 3.0f); // camera position
+glm::vec3 lightPos = glm::vec3(-50, 100, -50); // light position
+glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f); // light color
 float speed = 0.1f; // camera speed
 float horizontal_angle = 0; // camera horizontal angle
 float vertical_angle = glm::degrees(asin(0.1)); // camera vertical angle
@@ -265,8 +267,8 @@ int main()
 		androidBot.Draw();
 
 		ourShader.setVec3("viewPos", position);
-		ourShader.setVec3("light.position", -50, 100, -50);
-		ourShader.setVec3("light.color", 1.0,1.0,1.0);
+		ourShader.setVec3("light.position", lightPos);
+		ourShader.setVec3("light.color", lightColor);
 
 		// Scene part
 		// switch back to the Scene shader
@@ -281,6 +283,11 @@ int main()
 		ImGui::NewFrame();
 
 		ImGui::Begin("Animation Control Panel");
+
+		ImGui::SliderFloat("lightX", &lightPos.x, -100.0f, 100.0f);
+		ImGui::SliderFloat("lightY", &lightPos.y, -100.0f, 100.0f);
+		ImGui::SliderFloat("lightZ", &lightPos.z, -100.0f, 100.0f);
+		ImGui::ColorEdit3("lightColor", (float*)&lightColor);
 
 		// select map type
 		const char* mapTypeItems[] = { "normal", "reflection", "reflectionMap", "refraction" , "toonShader"};
