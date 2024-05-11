@@ -22,9 +22,7 @@ struct MaterialWithoutTexture
 struct Light 
 {
     vec3 position;
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
+    vec3 color;
 };
 
 in vec3 FragPos;
@@ -36,7 +34,6 @@ uniform Light light;
 uniform vec3 viewPos;
 uniform bool hasTexture;
 uniform int mapType;
-
 
 void main() 
 {
@@ -60,28 +57,57 @@ void main()
         FragColor = vec4(texture(skybox, R).rgb, 1.0);
         return;
     }
-    else if(mayType == 3)
-    {
-        float ratio = 1.00 / 1.52;
-        vec3 I = normalize(FragPos - viewPos);
-        vec3 R = refract(I, normalize(Normal), ratio);
-        FragColor = vec4(texture(skybox, R).rgb, 1.0);
-        return;
-    }
-
+//    else if(mayType == 3)
+//    {
+//        float ratio = 1.00 / 1.52;
+//        vec3 I = normalize(FragPos - viewPos);
+//        vec3 R = refract(I, normalize(Normal), ratio);
+//        FragColor = vec4(texture(skybox, R).rgb, 1.0);
+//        return;
+//    }
+    float ambientStrength = 0.5;
+    float diffuseStrength = 5.0;
+    float specularStrength = 0.5;
     if(!hasTexture) 
-    {
-        ambient = light.ambient * materialWithoutTexture.ambient;
-        diffuse = light.diffuse * (diff * materialWithoutTexture.diffuse);
+    {   
+        
+        ambient = ambientStrength* materialWithoutTexture.ambient * light.color;
+        diffuse = diffuseStrength *diff * materialWithoutTexture.diffuse * light.color;
         spec = pow(max(dot(viewDir, reflectDir), 0.0), materialWithoutTexture.shininess);
-        specular = light.specular * (spec * materialWithoutTexture.specular);
+        specular = specularStrength* spec * light.color ;
     } else 
     {
-        ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
-        diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoords));
-        specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+        ambient = ambientStrength * vec3(texture(material.diffuse, TexCoords));
+        diffuse = diffuseStrength * diff * vec3(texture(material.diffuse, TexCoords));
+        specular = specularStrength * spec * vec3(texture(material.specular, TexCoords));
     }
 
     vec3 result = ambient + diffuse + specular;
+
+    float intensity = dot(normalize(lightDir),Normal);
+    
+    if(mapType == 4)
+	{
+		if(intensity > 0.85)
+		{
+			result = specular;
+		}
+		else if(intensity > 0.5)
+		{
+			result = diffuse;
+		}
+		else if(intensity > 0.2)
+		{
+			result = vec3(0.3, 0.3, 0.3);
+		}
+		else
+		{
+			result = vec3(0, 0, 0);
+		}
+		
+        FragColor = vec4(result, 1.0);
+        return ;
+	}
+
     FragColor = vec4(result, 1.0);
 }

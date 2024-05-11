@@ -50,6 +50,7 @@ enum Environment
 	reflection,
 	reflectionMap,
 	refraction,
+	toonShader,
 }environment;
 
 
@@ -255,6 +256,8 @@ int main()
 			ourShader.setInt("mapType", 2);
 		if (environment == refraction)
 			ourShader.setInt("mapType", 3);
+		if(environment == toonShader)
+			ourShader.setInt("mapType", 4);
 
 
 		if (environment != normal)
@@ -263,9 +266,7 @@ int main()
 
 		ourShader.setVec3("viewPos", position);
 		ourShader.setVec3("light.position", -50, 100, -50);
-		ourShader.setVec3("light.ambient", 0.1, 0.6, 0.1);
-		ourShader.setVec3("light.diffuse", 5, 5, 5);
-		ourShader.setVec3("light.specular", 0, 0, 0);	
+		ourShader.setVec3("light.color", 1.0,1.0,1.0);
 
 		// Scene part
 		// switch back to the Scene shader
@@ -282,8 +283,8 @@ int main()
 		ImGui::Begin("Animation Control Panel");
 
 		// select map type
-		const char* mapTypeItems[] = { "normal", "reflection", "reflectionMap", "refraction" };
-		ImGui::Combo("Map Type", (int*)&environment, mapTypeItems, 4);
+		const char* mapTypeItems[] = { "normal", "reflection", "reflectionMap", "refraction" , "toonShader"};
+		ImGui::Combo("Map Type", (int*)&environment, mapTypeItems, 5);
 
 		// select model part
 		const char** playModeItems = new const char* [playModeStr.size()];
