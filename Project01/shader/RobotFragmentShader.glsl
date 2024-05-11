@@ -90,15 +90,15 @@ void main()
 	{
 		if(intensity > 0.85)
 		{
-			result = specular;
+			result *= vec3(0.7,0.7,0.7);
 		}
 		else if(intensity > 0.5)
 		{
-			result = diffuse;
+			result *= vec3(0.5,0.5,0.3);
 		}
 		else if(intensity > 0.2)
 		{
-			result = vec3(0.3, 0.3, 0.3);
+			result *= vec3(0.2, 0.2, 0.2);
 		}
 		else
 		{
