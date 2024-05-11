@@ -83,26 +83,20 @@ void main()
     }
 
     vec3 result = ambient + diffuse + specular;
-
-    float intensity = dot(normalize(lightDir),Normal);
     
     if(mapType == 4)
 	{
-		if(intensity > 0.85)
+		if(diff < 0.9 && diff > 0.7)
 		{
-			result *= vec3(0.7,0.7,0.7);
+			result *= vec3(0.85, 0.85, 0.85);
 		}
-		else if(intensity > 0.5)
-		{
-			result *= vec3(0.5,0.5,0.3);
+        else if(diff > 0.5)
+        {
+        result *= vec3(0.5, 0.5, 0.5);
 		}
-		else if(intensity > 0.2)
-		{
-			result *= vec3(0.2, 0.2, 0.2);
-		}
-		else
-		{
-			result = vec3(0, 0, 0);
+        else
+        {
+        result = vec3(0.0, 0.0, 0.0);
 		}
 		
         FragColor = vec4(result, 1.0);
