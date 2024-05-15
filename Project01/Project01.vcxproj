@@ -178,6 +178,8 @@
     <None Include="shader\FragmentShader.glsl" />
     <None Include="shader\RobotFragmentShader.glsl" />
     <None Include="shader\RobotVertexShader.glsl" />
+    <None Include="shader\ScreenFrameBufferFragmentShader.glsl" />
+    <None Include="shader\ScreenFrameBufferVertexShader.glsl" />
     <None Include="shader\SkyboxFragmentShader.glsl" />
     <None Include="shader\SkyboxVertexShader.glsl" />
     <None Include="shader\VertexShader.glsl" />

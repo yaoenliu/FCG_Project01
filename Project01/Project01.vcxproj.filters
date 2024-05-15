@@ -157,5 +157,11 @@
     <None Include="shader\VertexShader.glsl">
       <Filter>Shader</Filter>
     </None>
+    <None Include="shader\ScreenFrameBufferVertexShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\ScreenFrameBufferFragmentShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>
