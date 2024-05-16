@@ -139,28 +139,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\FragmentShader.glsl">
-      <Filter>Shader</Filter>
-    </None>
     <None Include="shader\RobotFragmentShader.glsl">
       <Filter>Shader</Filter>
     </None>
     <None Include="shader\RobotVertexShader.glsl">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="shader\SkyboxFragmentShader.glsl">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="shader\SkyboxVertexShader.glsl">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="shader\VertexShader.glsl">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="shader\ScreenFrameBufferVertexShader.glsl">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="shader\ScreenFrameBufferFragmentShader.glsl">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>
