@@ -1,5 +1,7 @@
 #pragma once
+
 #include "modelState.h"
+
 class keyFrame
 {
 public:
@@ -7,8 +9,5 @@ public:
     modelState state;
     float time;
 
-    keyFrame(modelState state, float time) :state(state), time(time)
-    {
-
-    }
+    keyFrame(modelState state, float time) :state(state), time(time) { }
 };

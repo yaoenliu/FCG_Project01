@@ -1,25 +1,43 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
-#include <gtc/type_ptr.hpp>
-#include <imgui.h>
-#include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_opengl3.h>
-#include <LoadShaders.h>
-#include <fstream>
-#include <string>
+#include "pch.h"
+
 #include "shader.hpp"
 #include "Object.h"
 #include "model.h"
-#include "stb_image.h"
-#include "Animation\Animator.h"
 
-#include <OpenMesh/Core/IO/MeshIO.hh>
-#include <OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh>
+typedef OpenMesh::TriMesh_ArrayKernelT<> OAOMesh;
 
-typedef OpenMesh::PolyMesh_ArrayKernelT<> OAOMesh;
+vector<string>playModeStr = { "once", "loop", "loopAll", "stop", "dev" };
 
+void importModelToOpenMesh(const std::string& filename) {
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_GenSmoothNormals);
+
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+		std::cerr << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
+		return;
+	}
+
+	aiMesh* mesh = scene->mMeshes[0];
+
+	OpenMesh::TriMesh_ArrayKernelT<> omMesh;
+	std::vector<OpenMesh::VertexHandle> vertexHandles;
+
+	for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
+		aiVector3D aiVertex = mesh->mVertices[i];
+		vertexHandles.push_back(omMesh.add_vertex(OpenMesh::Vec3f(aiVertex.x, aiVertex.y, aiVertex.z)));
+	}
+
+	for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
+		aiFace& face = mesh->mFaces[i];
+		std::vector<OpenMesh::VertexHandle> face_vhandles;
+		for (unsigned int j = 0; j < face.mNumIndices; j++) {
+			face_vhandles.push_back(vertexHandles[face.mIndices[j]]);
+		}
+		omMesh.add_face(face_vhandles);
+	}
+
+	OpenMesh::IO::write_mesh(omMesh, "output.obj");
+}
 
 // Function prototypes here
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -49,7 +67,9 @@ fstream saved;
 GLFWwindow* window;
 ImGuiIO io;
 
-Model* androidBot;
+Model* bot;
+
+
 
 void callbackFuncSet()
 {
@@ -117,46 +137,46 @@ int Init()
 void modelLoad()
 {
 	// load models
-	androidBot = new Model("robot/robot.obj");
-	androidBot->setShader(new Shader("shader/RobotVertexShader.glsl", "shader/RobotFragmentShader.glsl"));
+	bot = new Model("robot/robot.obj");
+	bot->setShader(new Shader("shader/RobotVertexShader.glsl", "shader/RobotFragmentShader.glsl"));
 
 	// make animation
-	androidBot->setMode(playMode::stop);
+	bot->setMode(playMode::stop);
 
 	saved.open(".\\animationFile\\basicAnimation.txt", ios::in);
-	androidBot->addAnimation(saved);
+	bot->addAnimation(saved);
 	saved.close();
 	saved.open(".\\animationFile\\walkAnimation.txt", ios::in);
-	androidBot->addAnimation(saved);
+	bot->addAnimation(saved);
 	saved.close();
 	saved.open(".\\animationFile\\jumping_jacks_v2.txt", ios::in);
-	androidBot->addAnimation(saved);
+	bot->addAnimation(saved);
 	saved.close();
 	saved.open(".\\animationFile\\squatAnimation.txt", ios::in);
-	androidBot->addAnimation(saved);
+	bot->addAnimation(saved);
 	saved.close();
 	saved.open(".\\animationFile\\Kame_Hame_Ha.txt", ios::in);
-	androidBot->addAnimation(saved);
+	bot->addAnimation(saved);
 	saved.close();
 	saved.open(".\\animationFile\\puuAnimation.txt", ios::in);
-	androidBot->addAnimation(saved);
+	bot->addAnimation(saved);
 	saved.close();
 }
 
 void objRender()
 {
 	// switch to the model shader
-	androidBot->shader->use();
+	bot->shader->use();
 
 	// binding the uniform matrix view and projection
-	androidBot->shader->setMat4("projection", proj);
-	androidBot->shader->setMat4("view", view);
-	androidBot->shader->setVec3("light.position", lightPos);
-	androidBot->shader->setVec3("light.color", lightColor);
+	bot->shader->setMat4("projection", proj);
+	bot->shader->setMat4("view", view);
+	bot->shader->setVec3("light.position", lightPos);
+	bot->shader->setVec3("light.color", lightColor);
 
 	// render the loaded model
-	androidBot->setScale(0.005f);
-	androidBot->Draw();
+	bot->setScale(0.005f);
+	bot->Draw();
 }
 
 void imguiControl()
@@ -178,88 +198,88 @@ void imguiControl()
 	for (size_t i = 0; i < playModeStr.size(); i++) {
 		playModeItems[i] = playModeStr[i].c_str();
 	}
-	ImGui::Combo("Play Mode", &androidBot->playMode, playModeItems, playModeStr.size());
-	if (androidBot->playMode == stop)
+	ImGui::Combo("Play Mode", &bot->playMode, playModeItems, playModeStr.size());
+	if (bot->playMode == stop)
 	{
 		ImGui::SameLine();
 		if (ImGui::Button("Replay"))
 		{
-			androidBot->setMode(playMode::once);
+			bot->setMode(playMode::once);
 		}
 	}
 	// select animation part
-	const char** aniItems = new const char* [androidBot->animations.size()];
-	for (size_t i = 0; i < androidBot->animations.size(); i++) {
-		aniItems[i] = androidBot->animations[i].name.c_str();
+	const char** aniItems = new const char* [bot->animations.size()];
+	for (size_t i = 0; i < bot->animations.size(); i++) {
+		aniItems[i] = bot->animations[i].name.c_str();
 	}
-	ImGui::Combo("Animation", &androidBot->curIndex, aniItems, androidBot->animations.size());
+	ImGui::Combo("Animation", &bot->curIndex, aniItems, bot->animations.size());
 
-	if (androidBot->playMode == dev)
+	if (bot->playMode == dev)
 	{
 		// select joint part
-		const char** jointItems = new const char* [androidBot->joints.size()];
-		for (size_t i = 0; i < androidBot->joints.size(); i++) {
-			jointItems[i] = androidBot->joints[i].c_str();
+		const char** jointItems = new const char* [bot->joints.size()];
+		for (size_t i = 0; i < bot->joints.size(); i++) {
+			jointItems[i] = bot->joints[i].c_str();
 		}
-		ImGui::Combo("Joint", &selectedJoint, jointItems, androidBot->joints.size());
-		jointState& slectedJoint = androidBot->jointMesh[androidBot->joints[selectedJoint]]->joint;
+		ImGui::Combo("Joint", &selectedJoint, jointItems, bot->joints.size());
+		jointState& slectedJoint = bot->jointMesh[bot->joints[selectedJoint]]->joint;
 
 
 		// select key frame part
-		const char** frameItems = new const char* [androidBot->animations[androidBot->curIndex].keyFrames.size()];
-		for (size_t i = 0; i < androidBot->animations[androidBot->curIndex].keyFrames.size(); i++) {
-			std::string str = std::to_string(androidBot->animations[androidBot->curIndex].keyFrames[i].time);
+		const char** frameItems = new const char* [bot->animations[bot->curIndex].keyFrames.size()];
+		for (size_t i = 0; i < bot->animations[bot->curIndex].keyFrames.size(); i++) {
+			std::string str = std::to_string(bot->animations[bot->curIndex].keyFrames[i].time);
 			char* cstr = new char[str.length() + 1];
 			strcpy_s(cstr, str.length() + 1, str.c_str());
 			frameItems[i] = cstr;
 		}
-		ImGui::Combo("Frame", &selectedFrame, frameItems, androidBot->animations[androidBot->curIndex].keyFrames.size());
-		if (androidBot->playMode == dev)
+		ImGui::Combo("Frame", &selectedFrame, frameItems, bot->animations[bot->curIndex].keyFrames.size());
+		if (bot->playMode == dev)
 		{
-			androidBot->playTime = androidBot->animations[androidBot->curIndex].keyFrames[selectedFrame].time;
+			bot->playTime = bot->animations[bot->curIndex].keyFrames[selectedFrame].time;
 		}
 		// delete frame button
 		if (ImGui::Button("Key Frame Delete"))
 		{
-			androidBot->animations[androidBot->curIndex].keyFrames.erase(androidBot->animations[androidBot->curIndex].keyFrames.begin() + selectedFrame);
-			androidBot->animations[androidBot->curIndex].duration = androidBot->animations[androidBot->curIndex].keyFrames[androidBot->animations[androidBot->curIndex].keyFrames.size() - 1].time;
+			bot->animations[bot->curIndex].keyFrames.erase(bot->animations[bot->curIndex].keyFrames.begin() + selectedFrame);
+			bot->animations[bot->curIndex].duration = bot->animations[bot->curIndex].keyFrames[bot->animations[bot->curIndex].keyFrames.size() - 1].time;
 			selectedFrame = 0;
 		}
 		// joint control panel
 		ImGui::Text("Translation");
 		ImGui::SameLine();
 		if (ImGui::Button("reset translation"))
-			androidBot->animations[androidBot->curIndex].keyFrames[selectedFrame].state.jointMap[androidBot->joints[selectedJoint]].translation = glm::vec3(0.0f);
-		ImGui::SliderFloat("posx", &androidBot->animations[androidBot->curIndex].keyFrames[selectedFrame].state.jointMap[androidBot->joints[selectedJoint]].translation.x, -50.0f, 50.0f);
-		ImGui::SliderFloat("posy", &androidBot->animations[androidBot->curIndex].keyFrames[selectedFrame].state.jointMap[androidBot->joints[selectedJoint]].translation.y, -50.0f, 50.0f);
-		ImGui::SliderFloat("posz", &androidBot->animations[androidBot->curIndex].keyFrames[selectedFrame].state.jointMap[androidBot->joints[selectedJoint]].translation.z, -50.0f, 50.0f);
+			bot->animations[bot->curIndex].keyFrames[selectedFrame].state.jointMap[bot->joints[selectedJoint]].translation = glm::vec3(0.0f);
+		ImGui::SliderFloat("posx", &bot->animations[bot->curIndex].keyFrames[selectedFrame].state.jointMap[bot->joints[selectedJoint]].translation.x, -50.0f, 50.0f);
+		ImGui::SliderFloat("posy", &bot->animations[bot->curIndex].keyFrames[selectedFrame].state.jointMap[bot->joints[selectedJoint]].translation.y, -50.0f, 50.0f);
+		ImGui::SliderFloat("posz", &bot->animations[bot->curIndex].keyFrames[selectedFrame].state.jointMap[bot->joints[selectedJoint]].translation.z, -50.0f, 50.0f);
 
 		ImGui::Text("Scale");
 		ImGui::SameLine();
 		if (ImGui::Button("reset scale"))
-			androidBot->animations[androidBot->curIndex].keyFrames[selectedFrame].state.jointMap[androidBot->joints[selectedJoint]].scale = glm::vec3(1.0f);
-		ImGui::SliderFloat("sclx", &androidBot->animations[androidBot->curIndex].keyFrames[selectedFrame].state.jointMap[androidBot->joints[selectedJoint]].scale.x, 0.2f, 5.0f);
-		ImGui::SliderFloat("scly", &androidBot->animations[androidBot->curIndex].keyFrames[selectedFrame].state.jointMap[androidBot->joints[selectedJoint]].scale.y, 0.2f, 5.0f);
-		ImGui::SliderFloat("sclz", &androidBot->animations[androidBot->curIndex].keyFrames[selectedFrame].state.jointMap[androidBot->joints[selectedJoint]].scale.z, 0.2f, 5.0f);
+			bot->animations[bot->curIndex].keyFrames[selectedFrame].state.jointMap[bot->joints[selectedJoint]].scale = glm::vec3(1.0f);
+		ImGui::SliderFloat("sclx", &bot->animations[bot->curIndex].keyFrames[selectedFrame].state.jointMap[bot->joints[selectedJoint]].scale.x, 0.2f, 5.0f);
+		ImGui::SliderFloat("scly", &bot->animations[bot->curIndex].keyFrames[selectedFrame].state.jointMap[bot->joints[selectedJoint]].scale.y, 0.2f, 5.0f);
+		ImGui::SliderFloat("sclz", &bot->animations[bot->curIndex].keyFrames[selectedFrame].state.jointMap[bot->joints[selectedJoint]].scale.z, 0.2f, 5.0f);
 
 		ImGui::Text("Rotation");
 		ImGui::SameLine();
 		if (ImGui::Button("reset rotation"))
-			androidBot->animations[androidBot->curIndex].keyFrames[selectedFrame].state.jointMap[androidBot->joints[selectedJoint]].rotation = glm::vec3(0.0f);
-		ImGui::SliderFloat("rotx", &androidBot->animations[androidBot->curIndex].keyFrames[selectedFrame].state.jointMap[androidBot->joints[selectedJoint]].rotation.x, -180.0f, 180.0f);
-		ImGui::SliderFloat("roty", &androidBot->animations[androidBot->curIndex].keyFrames[selectedFrame].state.jointMap[androidBot->joints[selectedJoint]].rotation.y, -180.0f, 180.0f);
-		ImGui::SliderFloat("rotz", &androidBot->animations[androidBot->curIndex].keyFrames[selectedFrame].state.jointMap[androidBot->joints[selectedJoint]].rotation.z, -180.0f, 180.0f);
+			bot->animations[bot->curIndex].keyFrames[selectedFrame].state.jointMap[bot->joints[selectedJoint]].rotation = glm::vec3(0.0f);
+		ImGui::SliderFloat("rotx", &bot->animations[bot->curIndex].keyFrames[selectedFrame].state.jointMap[bot->joints[selectedJoint]].rotation.x, -180.0f, 180.0f);
+		ImGui::SliderFloat("roty", &bot->animations[bot->curIndex].keyFrames[selectedFrame].state.jointMap[bot->joints[selectedJoint]].rotation.y, -180.0f, 180.0f);
+		ImGui::SliderFloat("rotz", &bot->animations[bot->curIndex].keyFrames[selectedFrame].state.jointMap[bot->joints[selectedJoint]].rotation.z, -180.0f, 180.0f);
 	}
 
 	ImGui::Text("Animation seek bar");
-	ImGui::SliderFloat("time", &androidBot->playTime, 0, androidBot->animations[androidBot->curIndex].duration);
-	if (androidBot->playMode == dev)
+	ImGui::SliderFloat("time", &bot->playTime, 0, bot->animations[bot->curIndex].duration);
+	if (bot->playMode == dev)
 	{
 		int closestFrame = 0;
 		float closestTime = 100;
-		for (int i = 0; i < androidBot->animations[androidBot->curIndex].keyFrames.size(); i++)
+		for (int i = 0; i < bot->animations[bot->curIndex].keyFrames.size(); i++)
 		{
-			float temp = abs(androidBot->animations[androidBot->curIndex].keyFrames[i].time - androidBot->playTime);
+			float temp = abs(bot->animations[bot->curIndex].keyFrames[i].time - bot->playTime);
 			if (temp < closestTime)
 			{
 				closestTime = temp;
@@ -267,7 +287,7 @@ void imguiControl()
 			}
 		}
 		selectedFrame = closestFrame;
-		androidBot->playTime = androidBot->animations[androidBot->curIndex].keyFrames[closestFrame].time;
+		bot->playTime = bot->animations[bot->curIndex].keyFrames[closestFrame].time;
 
 		// add key frame button
 		static bool addKeyFramePopup = false;
@@ -283,8 +303,8 @@ void imguiControl()
 				ImGui::InputFloat("frameTime at:", &frameTime);
 				if (ImGui::Button("Add"))
 				{
-					androidBot->addKeyFrame(androidBot->curIndex, frameTime);
-					androidBot->animations[androidBot->curIndex].endWithLastFrame();
+					bot->addKeyFrame(bot->curIndex, frameTime);
+					bot->animations[bot->curIndex].endWithLastFrame();
 					addKeyFramePopup = false;
 					ImGui::CloseCurrentPopup();
 				}
@@ -307,9 +327,9 @@ void imguiControl()
 				ImGui::InputFloat("duration", &aniDuration);
 				if (ImGui::Button("Add"))
 				{
-					androidBot->animations.push_back(Animation(aniName, aniDuration));
-					androidBot->addKeyFrame(androidBot->animations.size() - 1, 0);
-					androidBot->animations[androidBot->animations.size() - 1].endWithLastFrame();
+					bot->animations.push_back(Animation(aniName, aniDuration));
+					bot->addKeyFrame(bot->animations.size() - 1, 0);
+					bot->animations[bot->animations.size() - 1].endWithLastFrame();
 					addAnimationPopup = false;
 					ImGui::CloseCurrentPopup();
 				}
@@ -323,14 +343,14 @@ void imguiControl()
 		if (ImGui::Button("Load animation"))
 		{
 			saved.open(buffer, ios::in);
-			androidBot->loadAnimation(saved, androidBot->curIndex);
+			bot->loadAnimation(saved, bot->curIndex);
 			saved.close();
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Save animation"))
 		{
 			saved.open(buffer, ios::out);
-			androidBot->saveAnimation(saved, androidBot->curIndex);
+			bot->saveAnimation(saved, bot->curIndex);
 			saved.close();
 		}
 	}
@@ -372,6 +392,9 @@ int main()
 	if (!Init())
 		return -1;
 	modelLoad();
+
+	//importModelToOpenMesh("robot/robot.obj");
+
 	mainLoop();
 	// Terminate GLFW
 	glfwTerminate();

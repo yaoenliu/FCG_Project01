@@ -1,6 +1,9 @@
 #pragma once
+
 #include <iostream>
+
 #include "keyFrame.h"
+
 class Animation
 {
 private:
@@ -31,15 +34,9 @@ public:
     }
 
     // set the duration of the animation
-    Animation(float duration) : duration(duration)
-    {
+    Animation(float duration) : duration(duration) { }
 
-    }
-
-    Animation(string name, float duration) : name(name), duration(duration)
-    {
-
-	}
+    Animation(string name, float duration) : name(name), duration(duration) { }
 
     modelState update(float aniTime)
     {

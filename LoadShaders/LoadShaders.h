@@ -1,6 +1,8 @@
 #pragma once
+
 #include <glad/glad.h>
 #include <iostream>
+
 typedef struct
 {
 	GLenum type;

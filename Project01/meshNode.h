@@ -1,12 +1,6 @@
 #pragma once
 
-#include <glad/glad.h> 
-
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
-#include <gtc/quaternion.hpp>
-
-#include <iostream>
+#include "pch.h"
 
 #include "LoadShaders.h"
 #include "mesh.hpp"

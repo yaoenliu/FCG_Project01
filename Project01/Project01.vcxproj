@@ -145,10 +145,10 @@
     <ClCompile Include="..\imgui-1.90.4\imgui_tables.cpp" />
     <ClCompile Include="..\imgui-1.90.4\imgui_widgets.cpp" />
     <ClCompile Include="..\LoadShaders\LoadShaders.cpp" />
-    <ClCompile Include="Animation\Animator.cpp" />
     <ClCompile Include="jointState.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="meshNode.cpp" />
+    <ClCompile Include="model.cpp" />
     <ClCompile Include="modelState.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -162,7 +162,6 @@
     <ClInclude Include="..\imgui-1.90.4\imstb_truetype.h" />
     <ClInclude Include="..\LoadShaders\LoadShaders.h" />
     <ClInclude Include="Animation\Animation.h" />
-    <ClInclude Include="Animation\Animator.h" />
     <ClInclude Include="Animation\keyFrame.h" />
     <ClInclude Include="GLID.h" />
     <ClInclude Include="jointState.h" />
@@ -171,6 +170,7 @@
     <ClInclude Include="model.h" />
     <ClInclude Include="modelState.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="pch.h" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>

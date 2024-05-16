@@ -1,10 +1,6 @@
 #pragma once
 
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
-#include <gtc/quaternion.hpp>
-#include <unordered_map>
-#include <string>
+#include "pch.h"
 
 #include "jointState.h"
 

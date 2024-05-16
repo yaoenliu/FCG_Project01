@@ -1,11 +1,6 @@
 #pragma once
 
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
-#include <gtc/quaternion.hpp>
-#include <fstream>
-#include <iostream>
-#include <string>
+#include "pch.h"
 
 class jointState
 {
