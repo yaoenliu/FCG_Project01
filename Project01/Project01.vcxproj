@@ -103,16 +103,16 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_USE_MATH_DEFINES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)OpenMesh 10.0\include;$(SolutionDir)glad\include\;$(SolutionDir)glfw-3.4.bin.WIN64\include;$(SolutionDir)glm;$(SolutionDir)imgui-1.90.4;$(SolutionDir)LoadShaders;$(SolutionDir)assimp\include;$(SolutionDir)SOIL\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)glad\include\;$(SolutionDir)glfw-3.4.bin.WIN64\include;$(SolutionDir)glm;$(SolutionDir)imgui-1.90.4;$(SolutionDir)LoadShaders;$(SolutionDir)assimp\include;$(SolutionDir)SOIL\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;assimp-vc143-mtd.lib;OpenMeshCored.lib;OpenMeshToolsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)OpenMesh 10.0\lib;$(SolutionDir)assimp;$(SolutionDir)SOIL\src;$(SolutionDir)glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)assimp;$(SolutionDir)SOIL\src;$(SolutionDir)glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -175,8 +175,14 @@
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shader\FragmentShader.glsl" />
     <None Include="shader\RobotFragmentShader.glsl" />
     <None Include="shader\RobotVertexShader.glsl" />
+    <None Include="shader\ScreenFrameBufferFragmentShader.glsl" />
+    <None Include="shader\ScreenFrameBufferVertexShader.glsl" />
+    <None Include="shader\SkyboxFragmentShader.glsl" />
+    <None Include="shader\SkyboxVertexShader.glsl" />
+    <None Include="shader\VertexShader.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
