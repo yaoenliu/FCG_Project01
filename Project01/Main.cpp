@@ -47,6 +47,7 @@ int selectedJoint = 0;
 int selectedFrame = 0;
 
 bool isMosaic = false;
+bool isFloor = false;
 
 enum Environment
 {
@@ -65,6 +66,17 @@ ShaderInfo shaders[] = {
 	{GL_VERTEX_SHADER, "shader/vertexShader.glsl"},
 	{GL_FRAGMENT_SHADER, "shader/fragmentShader.glsl"},
 	{GL_NONE, NULL}
+};
+
+float planeVertices[] = {
+	// positions            // normals         // texcoords
+	 25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  25.0f,  0.0f,
+	-25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
+	-25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,   0.0f, 25.0f,
+
+	 25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  25.0f,  0.0f,
+	-25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,   0.0f, 25.0f,
+	 25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,  25.0f, 25.0f
 };
 
 float skyboxVertices[] = {
@@ -191,6 +203,22 @@ int main()
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
+
+	// plane VAO
+	GLuint planeVAO , planeVBO;
+	glGenVertexArrays(1, &planeVAO);
+	glGenBuffers(1, &planeVBO);
+	glBindVertexArray(planeVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glBindVertexArray(0);
+
 	// Cubemap (Skybox)
 	vector<const GLchar*> faces;
 	faces.push_back("skybox/right.jpg");
@@ -206,6 +234,8 @@ int main()
 	Shader ourShader("shader/RobotVertexShader.glsl", "shader/RobotFragmentShader.glsl");
 
 	Shader screenShader("shader/ScreenFrameBufferVertexShader.glsl", "shader/ScreenFrameBufferFragmentShader.glsl");
+
+	Shader floorShader("shader/VertexShader.glsl", "shader/FragmentShader.glsl");
 
 
 	// load models
@@ -333,6 +363,19 @@ int main()
 		ourShader.setVec3("light.position", lightPos);
 		ourShader.setVec3("light.color", lightColor);
 
+		if (isFloor)
+		{
+			// floor part
+			floorShader.use();
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
+			floorShader.setMat4("proj", proj);
+			floorShader.setMat4("view", view);
+			floorShader.setMat4("model", model);
+			glBindVertexArray(planeVAO);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+
 		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
@@ -369,6 +412,10 @@ int main()
 		if (ImGui::Button("Mosaic"))
 		{
 			isMosaic = !isMosaic;
+		}
+		if (ImGui::Button("Floor"))
+		{
+			isFloor = !isFloor;
 		}
 		// select map type
 		const char* mapTypeItems[] = { "normal", "reflection", "reflectionMap", "refraction" , "toonShader"};
