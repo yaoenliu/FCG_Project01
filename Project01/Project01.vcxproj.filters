@@ -139,7 +139,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\FragmentShader.glsl">
+    <None Include="shader\ShadowFragmentShader.glsl">
       <Filter>Shader</Filter>
     </None>
     <None Include="shader\RobotFragmentShader.glsl">
@@ -154,7 +154,7 @@
     <None Include="shader\SkyboxVertexShader.glsl">
       <Filter>Shader</Filter>
     </None>
-    <None Include="shader\VertexShader.glsl">
+    <None Include="shader\ShadowVertexShader.glsl">
       <Filter>Shader</Filter>
     </None>
     <None Include="shader\ScreenFrameBufferVertexShader.glsl">
@@ -167,18 +167,6 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="shader\ShadowMappingDepthVertexShader.glsl">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="shader\ShadowMappingVertexShader.glsl">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="shader\ShadowMappingFragmentShader.glsl">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="shader\FloorFragmentShader.glsl">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="shader\FloorVertexShader.glsl">
       <Filter>Shader</Filter>
     </None>
     <None Include="shader\DebugQuadVertexShader.glsl">

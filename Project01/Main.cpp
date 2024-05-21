@@ -63,12 +63,6 @@ enum Environment
 
 ImGuiIO io;
 
-// global shader info
-ShaderInfo shaders[] = {
-	{GL_VERTEX_SHADER, "shader/vertexShader.glsl"},
-	{GL_FRAGMENT_SHADER, "shader/fragmentShader.glsl"},
-	{GL_NONE, NULL}
-};
 
 float planeVertices[] = {
 	// positions            // normals         // texcoords
@@ -176,8 +170,6 @@ int main()
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		return -1;
 
-	// Set the shader program
-	sceneShaderProgram = LoadShaders(shaders);
 
 	// configure global opengl state
 	glEnable(GL_DEPTH_TEST);
@@ -237,9 +229,7 @@ int main()
 
 	Shader screenShader("shader/ScreenFrameBufferVertexShader.glsl", "shader/ScreenFrameBufferFragmentShader.glsl");
 
-	Shader floorShader("shader/FloorVertexShader.glsl", "shader/FloorFragmentShader.glsl");
-
-	Shader depthShader("shader/VertexShader.glsl", "shader/FragmentShader.glsl");
+	Shader depthShader("shader/ShadowVertexShader.glsl", "shader/ShadowFragmentShader.glsl");
 
 	Shader simpleDepthShader("shader/ShadowMappingDepthVertexShader.glsl", "shader/ShadowMappingDepthFragmentShader.glsl");
 
@@ -381,7 +371,6 @@ int main()
 		// floor part
 		simpleDepthShader.use();
 		glm::mat4 model = glm::mat4(1.0f);
-		//model = glm::translate(model, glm::vec3(0.0f,  0.0f, 0.0f));
 		simpleDepthShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 		simpleDepthShader.setMat4("model", model);
 		glBindVertexArray(planeVAO);
