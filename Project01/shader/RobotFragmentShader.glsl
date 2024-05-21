@@ -34,9 +34,15 @@ uniform Light light;
 uniform vec3 viewPos;
 uniform bool hasTexture;
 uniform int mapType;
+uniform bool isDepth;
 
 void main() 
 {
+	if(isDepth)
+	{
+		//FragColor = vec4(vec3(gl_FragCoord.z), 1.0);
+		return;
+	}
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;

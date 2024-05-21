@@ -11,9 +11,16 @@ out vec3 Normal;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform bool isDepth;
+uniform mat4 lightSpaceMatrix;
 
 void main() 
 {
+    if(isDepth)
+	{
+		gl_Position = lightSpaceMatrix * model * vec4(aPos, 1.0);
+		return;
+	}
     TexCoords = aTexCoords;
     FragPos = vec3(model * vec4(aPos, 1.0));
     Normal = mat3(transpose(inverse(model))) * aNormal;

@@ -163,5 +163,29 @@
     <None Include="shader\ScreenFrameBufferFragmentShader.glsl">
       <Filter>Shader</Filter>
     </None>
+    <None Include="shader\ShadowMappingDepthFragmentShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\ShadowMappingDepthVertexShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\ShadowMappingVertexShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\ShadowMappingFragmentShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\FloorFragmentShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\FloorVertexShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\DebugQuadVertexShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\DebugQuadFragmentShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

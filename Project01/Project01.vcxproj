@@ -175,11 +175,19 @@
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shader\DebugQuadVertexShader.glsl" />
+    <None Include="shader\DebugQuadFragmentShader.glsl" />
+    <None Include="shader\FloorFragmentShader.glsl" />
+    <None Include="shader\FloorVertexShader.glsl" />
     <None Include="shader\FragmentShader.glsl" />
     <None Include="shader\RobotFragmentShader.glsl" />
     <None Include="shader\RobotVertexShader.glsl" />
     <None Include="shader\ScreenFrameBufferFragmentShader.glsl" />
     <None Include="shader\ScreenFrameBufferVertexShader.glsl" />
+    <None Include="shader\ShadowMappingFragmentShader.glsl" />
+    <None Include="shader\ShadowMappingVertexShader.glsl" />
+    <None Include="shader\ShadowMappingDepthFragmentShader.glsl" />
+    <None Include="shader\ShadowMappingDepthVertexShader.glsl" />
     <None Include="shader\SkyboxFragmentShader.glsl" />
     <None Include="shader\SkyboxVertexShader.glsl" />
     <None Include="shader\VertexShader.glsl" />
