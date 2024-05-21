@@ -318,7 +318,7 @@ int main()
 
 	// configure depth map FBO
 	// -----------------------
-	const unsigned int SHADOW_WIDTH = 1920, SHADOW_HEIGHT = 1080;
+	const unsigned int SHADOW_WIDTH = 10000, SHADOW_HEIGHT = 10000;
 	unsigned int depthMapFBO;
 	glGenFramebuffers(1, &depthMapFBO);
 	// create depth texture
