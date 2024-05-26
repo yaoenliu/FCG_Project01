@@ -150,6 +150,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="meshNode.cpp" />
     <ClCompile Include="modelState.cpp" />
+    <ClCompile Include="ParticleEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\imgui-1.90.4\backends\imgui_impl_glfw.h" />
@@ -171,12 +172,15 @@
     <ClInclude Include="model.h" />
     <ClInclude Include="modelState.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="ParticleEffect.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\DebugQuadVertexShader.glsl" />
     <None Include="shader\DebugQuadFragmentShader.glsl" />
+    <None Include="shader\ParticleFragmentShader.glsl" />
+    <None Include="shader\ParticleVertexShader.glsl" />
     <None Include="shader\ShadowFragmentShader.glsl" />
     <None Include="shader\RobotFragmentShader.glsl" />
     <None Include="shader\RobotVertexShader.glsl" />

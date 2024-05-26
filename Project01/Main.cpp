@@ -14,6 +14,7 @@
 #include "model.h"
 #include "stb_image.h"
 #include "Animation\Animator.h"
+#include "ParticleEffect.hpp"
 
 
 // Function prototypes here
@@ -24,6 +25,8 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 GLuint loadCubemap(vector<const GLchar*> faces);
 void renderQuad();
+void loadParticleEffect(Shader* shader , Model* robot , const int& animationIndex);
+void saveParticleEffect(Model* robot,const int& animationIndex);
 
 
 // camera and color variables
@@ -50,6 +53,8 @@ int selectedFrame = 0;
 
 bool isMosaic = false;
 bool isFloor = false;
+
+std::map<float , vector<ParticleEffect*> > particleEffects;
 
 enum Environment
 {
@@ -235,6 +240,8 @@ int main()
 
 	Shader debugDepthQuad("shader/DebugQuadVertexShader.glsl", "shader/DebugQuadFragmentShader.glsl");
 
+	Shader particleShader("shader/ParticleVertexShader.glsl", "shader/ParticleFragmentShader.glsl");
+
 
 	// load models
 	Model androidBot("robot/robot.obj");
@@ -335,6 +342,9 @@ int main()
 	debugDepthQuad.use();
 	debugDepthQuad.setInt("depthMap", 0);
 
+	particleEffects.clear();
+
+	ParticleEffect newParticle(&particleShader);
 
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(window))
@@ -451,6 +461,20 @@ int main()
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		};
+		if (!particleEffects.empty()&&androidBot.playMode!=stop)
+		{
+			for (auto& particleEffect : particleEffects[androidBot.playTime])
+			{
+				particleShader.use();
+				particleEffect->lifeTime = 888.0f;
+				particleShader.setMat4("projection", proj);
+				particleShader.setMat4("view", view);
+				glm::mat4 parentModel = androidBot.jointMesh[particleEffect->partName]->modelMatrix;
+				particleEffect->parentModel = parentModel;
+				particleEffect->draw();
+			}
+		}
+
 
 		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -502,6 +526,7 @@ int main()
 		{
 			isFloor = !isFloor;
 		}
+		
 		// select map type
 		const char* mapTypeItems[] = { "normal", "reflection", "reflectionMap", "refraction" , "toonShader"};
 		ImGui::Combo("Map Type", (int*)&environment, mapTypeItems, 5);
@@ -624,6 +649,19 @@ int main()
 					ImGui::EndPopup();
 				}
 			}
+			const char** particleEffectItem = new const char*[particleEffects[frameTime].size()];
+			for (int i = 0; i < particleEffects[frameTime].size(); i++)
+			{
+				particleEffectItem[i] = particleEffects[frameTime][i]->partName.c_str();
+			}
+			int selectedParticleEffect = 0;
+			ImGui::Combo("Particle Effect",&selectedParticleEffect, particleEffectItem, particleEffects[androidBot.playTime].size());
+			if (ImGui::Button("Add Particle Effect"))
+			{
+				cout << androidBot.playTime << endl;
+				newParticle.partName = androidBot.joints[selectedJoint];
+				particleEffects[androidBot.playTime].push_back(&newParticle);
+			}
 			// add animation button
 			static bool addAnimationPopup = false;
 			if (ImGui::Button("Add Animation"))
@@ -658,6 +696,7 @@ int main()
 				saved.open(buffer, ios::in);
 				androidBot.loadAnimation(saved, androidBot.curIndex);
 				saved.close();
+				loadParticleEffect(&particleShader, &androidBot, androidBot.curIndex);
 			}
 			ImGui::SameLine();
 			if (ImGui::Button("Save animation"))
@@ -665,6 +704,7 @@ int main()
 				saved.open(buffer, ios::out);
 				androidBot.saveAnimation(saved, androidBot.curIndex);
 				saved.close();
+				saveParticleEffect(&androidBot, androidBot.curIndex);
 			}
 		}
 		// Show FPS
@@ -875,4 +915,78 @@ void renderQuad()
 	glBindVertexArray(quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
+}
+
+
+void loadParticleEffect(Shader* shader , Model* robot , const int& animationIndex)
+{
+	Animation& animation = robot->animations[animationIndex];
+	string path = ".\\" + animation.name + "ParticleEffect.txt";
+	fstream file;
+	std::string strIn = "";
+	file.open(path, ios::in);
+	particleEffects.clear();
+	while (std::getline(file, strIn))
+	{
+		float time = std::stof(strIn);
+		while (std::getline(file, strIn)&&strIn != "endTime")
+		{
+			
+			string partName = strIn;
+			std::getline(file, strIn);
+			float lifeTime = std::stof(strIn);
+			std::getline(file, strIn);
+			int nrParticles = std::stoi(strIn);
+			std::getline(file, strIn);
+			float angle = std::stof(strIn);
+			std::getline(file, strIn);
+			float heightIncrement = std::stof(strIn);
+			std::getline(file, strIn);
+			float radius = std::stof(strIn);
+			std::getline(file, strIn);
+			std::stringstream ss(strIn);
+			glm::vec4 color;
+			ss >> color.x >> color.y >> color.z >> color.a;
+			std::getline(file, strIn);
+			std::stringstream ss1(strIn);
+			glm::vec3 translation;
+			ss1 >> translation.x >> translation.y >> translation.z;
+			std::getline(file, strIn);
+			std::stringstream ss2(strIn);
+			glm::vec3 rotation;
+			ss2 >> rotation.x >> rotation.y >> rotation.z;
+			std::getline(file, strIn);
+			std::stringstream ss3(strIn);
+			glm::vec3 scale;
+			ss3 >> scale.x >> scale.y >> scale.z;
+			ParticleEffect* effect = new ParticleEffect(shader,time,lifeTime, color, translation,rotation,scale,angle,radius,heightIncrement,nrParticles);
+			particleEffects[time].push_back(effect);
+		}
+	}
+}
+
+void saveParticleEffect(Model* robot , const int& animationIndex)
+{
+	Animation& animation = robot->animations[animationIndex];
+	string path = ".\\" + animation.name + "ParticleEffect.txt";
+	fstream file;
+	file.open(path, ios::out);
+	for (const auto& [time , effects] : particleEffects)
+	{
+		file << time << "\n";
+		for (const auto& effect : effects)
+		{
+			file << effect->partName << "\n";
+			file << effect->lifeTime << "\n";
+			file <<effect->nrParticles<<"\n";
+			file << effect->angle << "\n";
+			file <<effect->heightIncrement<<"\n";
+			file <<effect->radius<<"\n";
+			file << effect->color.x << " " << effect->color.y << " " << effect->color.z << effect->color.a << "\n";
+			file <<effect->translation.x<<" "<<effect->translation.y<<" "<<effect->translation.z<<"\n";
+			file << effect->rotation.x << " " << effect->rotation.y << " " << effect->rotation.z << "\n";
+			file << effect->scale.x << " " << effect->scale.y << " " << effect->scale.z << "\n";
+		}
+		file << "endTime\n";
+	}
 }

@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="資源檔">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Shader">
       <UniqueIdentifier>{b12c29db-9172-4907-aaa4-9517e68f4a59}</UniqueIdentifier>
     </Filter>
@@ -27,6 +23,10 @@
     </Filter>
     <Filter Include="Animation">
       <UniqueIdentifier>{b55f5572-fb0f-4596-abab-623ec6b0ad1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="來源檔案\資源檔">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -71,6 +71,9 @@
     </ClCompile>
     <ClCompile Include="jointState.cpp">
       <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleEffect.cpp">
+      <Filter>標頭檔</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -137,6 +140,9 @@
     <ClInclude Include="jointState.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="ParticleEffect.hpp">
+      <Filter>來源檔案</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\ShadowFragmentShader.glsl">
@@ -173,6 +179,12 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="shader\DebugQuadFragmentShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\ParticleFragmentShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\ParticleVertexShader.glsl">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>
