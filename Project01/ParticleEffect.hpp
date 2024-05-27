@@ -52,6 +52,8 @@ public:
 	GLuint cubeVAO, cubeVBO;
 	float dt = 0.01;
 	float lastUpdate;
+	float activeTime = 0;
+	float currentTime = 0;
 
 	ParticleEffect(Shader* shader, float startTime, float lifeTime, glm::vec4 color, glm::vec3 translation,
 		glm::vec3 rotation, glm::vec3 scale, float angle, float radius, float heightIncrement, int nrParticles);

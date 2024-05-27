@@ -464,21 +464,19 @@ int main()
 		};
 		if (!particleEffects.empty()&&androidBot.playMode!=stop)
 		{
-			if(androidBot.playTime==0)endTT = -1;
 			for (auto& [startTime , particleEffect] : particleEffects)
 			{
-				if (androidBot.playTime < startTime && endTT == startTime)continue;
-				endTT = startTime;
+				if (androidBot.playTime < startTime)continue;
 				for (auto& particle : particleEffect)
 				{
 					particleShader.use();
 					particleShader.setMat4("projection", proj);
 					particleShader.setMat4("view", view);
-					//glm::mat4 parentModel = glm::mat4(1.0f);
 					jointState& joint = androidBot.jointMesh[particle->partName]->joint;
 					glm::mat4 parentModel = joint.scaleMatrix() * joint.translationMatrix() * joint.rotationMatrix();
 					particle->offset = androidBot.jointMesh[particle->partName]->center;
 					particle->parentModel = parentModel;	
+					particle->currentTime = androidBot.playTime;
 					particle->draw();
 				}
 			}
@@ -670,6 +668,7 @@ int main()
 				//cout << androidBot.playTime << endl;
 				particleEffects[androidBot.playTime].push_back(new ParticleEffect(&particleShader));
 				particleEffects[androidBot.playTime].back()->partName = androidBot.joints[selectedJoint];
+				particleEffects[androidBot.playTime].back()->startTime = androidBot.playTime;
 			}
 			if (!particleEffects[androidBot.playTime].empty()&&ImGui::Button("Delete Particle Effect"))
 			{

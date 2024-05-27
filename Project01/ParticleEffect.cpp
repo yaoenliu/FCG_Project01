@@ -40,6 +40,7 @@ ParticleEffect::ParticleEffect(Shader* shader,float startTime , float lifeTime ,
 	lastUpdate = 0;
 	parentModel = glm::mat4(1.0f);
 	this->shader = shader;
+	activeTime = 0;
 	glGenVertexArrays(1, &cubeVAO);
 	glGenBuffers(1, &cubeVBO);
 	glBindVertexArray(cubeVAO);
@@ -71,6 +72,7 @@ ParticleEffect::ParticleEffect(Shader* shader)
 	nrParticles = 1000;
 	lastUpdate = 0;
 	parentModel = glm::mat4(1.0f);
+	activeTime = 0;
 	this->shader = shader;
 	glGenVertexArrays(1, &cubeVAO);
 	glGenBuffers(1, &cubeVBO);
@@ -121,6 +123,8 @@ void ParticleEffect::respawnParticle(Particle& particle)
 
 void ParticleEffect::draw()
 {
+	if (currentTime - startTime > lifeTime)isAction = false;
+	else isAction = true;
 	if (!isAction)return;
 	this->update();
 	glEnable(GL_BLEND);
@@ -141,8 +145,6 @@ void ParticleEffect::draw()
 
 void ParticleEffect::update()
 {
-	float curTime = glfwGetTime();
-	float deltaTime = curTime - lastUpdate;
 	//add new particles
 	size_t nrNewParticles = 2;
 	for (size_t i = 0; i < nrNewParticles; i++)
@@ -163,9 +165,5 @@ void ParticleEffect::update()
 		p.offset.z = sin(p.angle) * p.radius;
 		p.offset.y += p.hiehgtIncrement;
 	}
-	this->lifeTime -= deltaTime;
-	if (this->lifeTime <= 0.0f)
-		this->isAction = false;
-	lastUpdate = curTime;
 }
 
