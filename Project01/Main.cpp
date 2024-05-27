@@ -135,6 +135,7 @@ float quadVertices[] = { // vertex attributes for a quad that fills the entire s
 	 1.0f, -1.0f,  1.0f, 0.0f,
 	 1.0f,  1.0f,  1.0f, 1.0f
 };
+float endTT = -1;
 
 int main()
 {
@@ -463,15 +464,23 @@ int main()
 		};
 		if (!particleEffects.empty()&&androidBot.playMode!=stop)
 		{
-			for (auto& particleEffect : particleEffects[androidBot.playTime])
+			if(androidBot.playTime==0)endTT = -1;
+			for (auto& [startTime , particleEffect] : particleEffects)
 			{
-				particleShader.use();
-				particleEffect->lifeTime = 888.0f;
-				particleShader.setMat4("projection", proj);
-				particleShader.setMat4("view", view);
-				glm::mat4 parentModel = androidBot.jointMesh[particleEffect->partName]->modelMatrix;
-				particleEffect->parentModel = parentModel;
-				particleEffect->draw();
+				if (androidBot.playTime < startTime && endTT == startTime)continue;
+				endTT = startTime;
+				for (auto& particle : particleEffect)
+				{
+					particleShader.use();
+					particleShader.setMat4("projection", proj);
+					particleShader.setMat4("view", view);
+					//glm::mat4 parentModel = glm::mat4(1.0f);
+					jointState& joint = androidBot.jointMesh[particle->partName]->joint;
+					glm::mat4 parentModel = joint.scaleMatrix() * joint.translationMatrix() * joint.rotationMatrix();
+					particle->offset = androidBot.jointMesh[particle->partName]->center;
+					particle->parentModel = parentModel;	
+					particle->draw();
+				}
 			}
 		}
 
@@ -649,19 +658,51 @@ int main()
 					ImGui::EndPopup();
 				}
 			}
-			const char** particleEffectItem = new const char*[particleEffects[frameTime].size()];
-			for (int i = 0; i < particleEffects[frameTime].size(); i++)
+			const char** particleEffectItem = new const char*[particleEffects[androidBot.playTime].size()];
+			for (int i = 0; i < particleEffects[androidBot.playTime].size(); i++)
 			{
-				particleEffectItem[i] = particleEffects[frameTime][i]->partName.c_str();
+				particleEffectItem[i] = particleEffects[androidBot.playTime][i]->partName.c_str();
 			}
-			int selectedParticleEffect = 0;
+			static int selectedParticleEffect = 0;
 			ImGui::Combo("Particle Effect",&selectedParticleEffect, particleEffectItem, particleEffects[androidBot.playTime].size());
 			if (ImGui::Button("Add Particle Effect"))
 			{
-				cout << androidBot.playTime << endl;
-				newParticle.partName = androidBot.joints[selectedJoint];
-				particleEffects[androidBot.playTime].push_back(&newParticle);
+				//cout << androidBot.playTime << endl;
+				particleEffects[androidBot.playTime].push_back(new ParticleEffect(&particleShader));
+				particleEffects[androidBot.playTime].back()->partName = androidBot.joints[selectedJoint];
 			}
+			if (!particleEffects[androidBot.playTime].empty()&&ImGui::Button("Delete Particle Effect"))
+			{
+				particleEffects[androidBot.playTime].erase(particleEffects[androidBot.playTime].begin() + selectedParticleEffect);
+			}
+			if (!particleEffects[androidBot.playTime].empty())
+			{
+				ImGui::Text("ParticleEffect Translation");
+				ImGui::SameLine();
+				if (ImGui::Button("reset Particle translation"))
+					particleEffects[androidBot.playTime][selectedParticleEffect]->translation = glm::vec3(0.0f);
+				ImGui::SliderFloat("Particle posx", &particleEffects[androidBot.playTime][selectedParticleEffect]->translation.x, -100.0f, 100.0f);
+				ImGui::SliderFloat("Particle posy", &particleEffects[androidBot.playTime][selectedParticleEffect]->translation.y, -100.0f, 100.0f);
+				ImGui::SliderFloat("Particle posz", &particleEffects[androidBot.playTime][selectedParticleEffect]->translation.z, -100.0f, 100.0f);
+				ImGui::Text("ParticleEffect Scale");
+				ImGui::SameLine();
+				if (ImGui::Button("reset Particle scale"))
+					particleEffects[androidBot.playTime][selectedParticleEffect]->scale = glm::vec3(1.0f);
+				ImGui::SliderFloat("Particle sclx", &particleEffects[androidBot.playTime][selectedParticleEffect]->scale.x, 0.2f, 5.0f);
+				ImGui::SliderFloat("Particle scly", &particleEffects[androidBot.playTime][selectedParticleEffect]->scale.y, 0.2f, 5.0f);
+				ImGui::SliderFloat("Particle sclz", &particleEffects[androidBot.playTime][selectedParticleEffect]->scale.z, 0.2f, 5.0f);
+				ImGui::Text("ParticleEffect Rotation");
+				ImGui::SameLine();
+				if (ImGui::Button("reset Particle rotation"))
+					particleEffects[androidBot.playTime][selectedParticleEffect]->rotation = glm::vec3(0.0f);
+				ImGui::SliderFloat("Particle rotx", &particleEffects[androidBot.playTime][selectedParticleEffect]->rotation.x, -180.0f, 180.0f);
+				ImGui::SliderFloat("Particle roty", &particleEffects[androidBot.playTime][selectedParticleEffect]->rotation.y, -180.0f, 180.0f);
+				ImGui::SliderFloat("Particle rotz", &particleEffects[androidBot.playTime][selectedParticleEffect]->rotation.z, -180.0f, 180.0f);
+				ImGui::ColorEdit3("Particle color", (float*)&particleEffects[androidBot.playTime][selectedParticleEffect]->color);
+				ImGui::SliderFloat("Particle lifeTime", &particleEffects[androidBot.playTime][selectedParticleEffect]->lifeTime, 0.0f, 10.0f);
+				ImGui::SliderFloat("Particle radius", &particleEffects[androidBot.playTime][selectedParticleEffect]->radius, 0.0f, 10.0f);
+			}
+
 			// add animation button
 			static bool addAnimationPopup = false;
 			if (ImGui::Button("Add Animation"))

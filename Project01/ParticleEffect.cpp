@@ -131,7 +131,7 @@ void ParticleEffect::draw()
 		if (particle.life <= 0.0f)continue;
 		shader->setVec3("offset", particle.offset*glm::vec3(10.0f));
 		shader->setVec4("color", particle.color);
-		glm::mat4 particleModel = scaleMatrix()*translationMatrix()*rotationMatrix();
+		glm::mat4 particleModel = translationMatrix()*rotationMatrix()*scaleMatrix();
 		shader->setMat4("model", parentModel*particleModel);
 		glBindVertexArray(cubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
