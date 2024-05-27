@@ -557,8 +557,12 @@ int main()
 		for (size_t i = 0; i < androidBot.animations.size(); i++) {
 			aniItems[i] = androidBot.animations[i].name.c_str();
 		}
+		int preIndex = androidBot.curIndex;
 		ImGui::Combo("Animation", &androidBot.curIndex, aniItems, androidBot.animations.size());
-
+		if (androidBot.curIndex != preIndex)
+		{
+			loadParticleEffect(&particleShader, &androidBot, androidBot.curIndex);
+		}
 		if (androidBot.playMode == dev)
 		{
 			// select joint part
@@ -665,7 +669,7 @@ int main()
 			ImGui::Combo("Particle Effect",&selectedParticleEffect, particleEffectItem, particleEffects[androidBot.playTime].size());
 			if (ImGui::Button("Add Particle Effect"))
 			{
-				//cout << androidBot.playTime << endl;
+
 				particleEffects[androidBot.playTime].push_back(new ParticleEffect(&particleShader));
 				particleEffects[androidBot.playTime].back()->partName = androidBot.joints[selectedJoint];
 				particleEffects[androidBot.playTime].back()->startTime = androidBot.playTime;
@@ -673,6 +677,7 @@ int main()
 			if (!particleEffects[androidBot.playTime].empty()&&ImGui::Button("Delete Particle Effect"))
 			{
 				particleEffects[androidBot.playTime].erase(particleEffects[androidBot.playTime].begin() + selectedParticleEffect);
+				selectedParticleEffect = 0;
 			}
 			if (!particleEffects[androidBot.playTime].empty())
 			{
@@ -736,15 +741,21 @@ int main()
 				saved.open(buffer, ios::in);
 				androidBot.loadAnimation(saved, androidBot.curIndex);
 				saved.close();
-				loadParticleEffect(&particleShader, &androidBot, androidBot.curIndex);
 			}
 			ImGui::SameLine();
 			if (ImGui::Button("Save animation"))
 			{
 				saved.open(buffer, ios::out);
 				androidBot.saveAnimation(saved, androidBot.curIndex);
-				saved.close();
+				saved.close();;
+			}
+			if (ImGui::Button("Save particle effect"))
+			{
 				saveParticleEffect(&androidBot, androidBot.curIndex);
+			}
+			if (ImGui::Button("Load particle effect"))
+			{
+				loadParticleEffect(&particleShader, &androidBot, androidBot.curIndex);
 			}
 		}
 		// Show FPS
@@ -971,7 +982,6 @@ void loadParticleEffect(Shader* shader , Model* robot , const int& animationInde
 		float time = std::stof(strIn);
 		while (std::getline(file, strIn)&&strIn != "endTime")
 		{
-			
 			string partName = strIn;
 			std::getline(file, strIn);
 			float lifeTime = std::stof(strIn);
@@ -999,8 +1009,18 @@ void loadParticleEffect(Shader* shader , Model* robot , const int& animationInde
 			std::stringstream ss3(strIn);
 			glm::vec3 scale;
 			ss3 >> scale.x >> scale.y >> scale.z;
-			ParticleEffect* effect = new ParticleEffect(shader,time,lifeTime, color, translation,rotation,scale,angle,radius,heightIncrement,nrParticles);
-			particleEffects[time].push_back(effect);
+			particleEffects[time].push_back(new ParticleEffect(shader));
+			particleEffects[time].back()->partName = partName;
+			particleEffects[time].back()->startTime = time;
+			particleEffects[time].back()->lifeTime = lifeTime;
+			particleEffects[time].back()->nrParticles = nrParticles;
+			particleEffects[time].back()->angle = angle;
+			particleEffects[time].back()->heightIncrement = heightIncrement;
+			particleEffects[time].back()->radius = radius;
+			particleEffects[time].back()->color = color;
+			particleEffects[time].back()->translation = translation;
+			particleEffects[time].back()->rotation = rotation;
+			particleEffects[time].back()->scale = scale;
 		}
 	}
 }

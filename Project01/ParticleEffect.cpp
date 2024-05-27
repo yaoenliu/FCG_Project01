@@ -50,7 +50,10 @@ ParticleEffect::ParticleEffect(Shader* shader,float startTime , float lifeTime ,
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 
 	for (size_t i = 0; i < nrParticles; i++)
+	{
 		particles.push_back(Particle());
+	}
+		
 }
 
 ParticleEffect::ParticleEffect(Shader* shader)
@@ -74,6 +77,7 @@ ParticleEffect::ParticleEffect(Shader* shader)
 	parentModel = glm::mat4(1.0f);
 	activeTime = 0;
 	this->shader = shader;
+	shader->use();
 	glGenVertexArrays(1, &cubeVAO);
 	glGenBuffers(1, &cubeVBO);
 	glBindVertexArray(cubeVAO);
@@ -127,9 +131,9 @@ void ParticleEffect::draw()
 	else isAction = true;
 	if (!isAction)return;
 	this->update();
+	shader->use();
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	shader->use();
 	for (const Particle& particle : particles)
 	{
 		if (particle.life <= 0.0f)continue;
