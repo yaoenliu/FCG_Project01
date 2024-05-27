@@ -161,8 +161,8 @@ void ParticleEffect::update()
 	for (size_t i = 0; i < nrParticles; i++)
 	{
 		Particle& p = particles[i];
-		p.life -= dt;
 		if (p.life <= 0.0f)continue;
+		p.life -= dt;
 		p.angle += dt;
 		if (p.angle > 2 * PI)p.angle -= 2 * PI;
 		p.offset.x = cos(p.angle) * p.radius;

@@ -462,6 +462,12 @@ int main()
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		};
+		static int preAnimationIndex = -1; 
+		if (androidBot.playMode != stop && androidBot.playMode != dev &&preAnimationIndex != androidBot.curIndex)
+		{
+			loadParticleEffect(&particleShader, &androidBot, androidBot.curIndex);
+			preAnimationIndex = androidBot.curIndex;
+		}
 		if (!particleEffects.empty()&&androidBot.playMode!=stop)
 		{
 			for (auto& [startTime , particleEffect] : particleEffects)
@@ -1042,7 +1048,7 @@ void saveParticleEffect(Model* robot , const int& animationIndex)
 			file << effect->angle << "\n";
 			file <<effect->heightIncrement<<"\n";
 			file <<effect->radius<<"\n";
-			file << effect->color.x << " " << effect->color.y << " " << effect->color.z << effect->color.a << "\n";
+			file << effect->color.x << " " << effect->color.y << " " << effect->color.z <<" " << effect->color.a << "\n";
 			file <<effect->translation.x<<" "<<effect->translation.y<<" "<<effect->translation.z<<"\n";
 			file << effect->rotation.x << " " << effect->rotation.y << " " << effect->rotation.z << "\n";
 			file << effect->scale.x << " " << effect->scale.y << " " << effect->scale.z << "\n";
