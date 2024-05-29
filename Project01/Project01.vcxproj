@@ -151,6 +151,7 @@
     <ClCompile Include="meshNode.cpp" />
     <ClCompile Include="modelState.cpp" />
     <ClCompile Include="ParticleEffect.cpp" />
+    <ClCompile Include="waterFrameBuffers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\imgui-1.90.4\backends\imgui_impl_glfw.h" />
@@ -175,10 +176,13 @@
     <ClInclude Include="ParticleEffect.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="waterFrameBuffers.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\DebugQuadVertexShader.glsl" />
     <None Include="shader\DebugQuadFragmentShader.glsl" />
+    <None Include="shader\MotionBlurFragmentShader.glsl" />
+    <None Include="shader\MotionBlurVertexShader.glsl" />
     <None Include="shader\ParticleFragmentShader.glsl" />
     <None Include="shader\ParticleVertexShader.glsl" />
     <None Include="shader\ShadowFragmentShader.glsl" />
@@ -191,6 +195,8 @@
     <None Include="shader\SkyboxFragmentShader.glsl" />
     <None Include="shader\SkyboxVertexShader.glsl" />
     <None Include="shader\ShadowVertexShader.glsl" />
+    <None Include="shader\WaterFragmentShader.glsl" />
+    <None Include="shader\WaterVertexShader.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

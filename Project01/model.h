@@ -159,7 +159,6 @@ void Model::loadModel(string const& path)
 			}
 
 			mnode->center = (hightest + lowest) * 0.5f;
-			cout<<temp<<": " << mnode->center.x << " " << mnode->center.y << " " << mnode->center.z << endl;
 		}
 	}
 }

@@ -75,6 +75,9 @@
     <ClCompile Include="ParticleEffect.cpp">
       <Filter>標頭檔</Filter>
     </ClCompile>
+    <ClCompile Include="waterFrameBuffers.cpp">
+      <Filter>標頭檔</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\imgui-1.90.4\imconfig.h">
@@ -143,6 +146,9 @@
     <ClInclude Include="ParticleEffect.hpp">
       <Filter>來源檔案</Filter>
     </ClInclude>
+    <ClInclude Include="waterFrameBuffers.hpp">
+      <Filter>來源檔案</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\ShadowFragmentShader.glsl">
@@ -185,6 +191,18 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="shader\ParticleVertexShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\MotionBlurVertexShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\MotionBlurFragmentShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\WaterFragmentShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\WaterVertexShader.glsl">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>

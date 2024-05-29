@@ -15,7 +15,7 @@
 #include "stb_image.h"
 #include "Animation\Animator.h"
 #include "ParticleEffect.hpp"
-
+#include "waterFrameBuffers.hpp"
 
 // Function prototypes here
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -28,7 +28,7 @@ void renderQuad();
 void loadParticleEffect(Shader* shader , Model* robot , const int& animationIndex);
 void saveParticleEffect(Model* robot,const int& animationIndex);
 
-
+bool isInversPitch = false;
 // camera and color variables
 glm::mat4 proj; // projection matrix
 glm::mat4 view; // view matrix
@@ -55,6 +55,7 @@ bool isMosaic = false;
 bool isFloor = false;
 
 std::map<float , vector<ParticleEffect*> > particleEffects;
+
 
 enum Environment
 {
@@ -243,6 +244,8 @@ int main()
 
 	Shader particleShader("shader/ParticleVertexShader.glsl", "shader/ParticleFragmentShader.glsl");
 
+	Shader waterShader("shader/WaterVertexShader.glsl", "shader/WaterFragmentShader.glsl");
+
 
 	// load models
 	Model androidBot("robot/robot.obj");
@@ -346,6 +349,7 @@ int main()
 	particleEffects.clear();
 
 	ParticleEffect newParticle(&particleShader);
+	WaterFrameBuffers waterFrameBuffers;
 
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(window))
@@ -390,9 +394,152 @@ int main()
 		
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+		waterFrameBuffers.bindReflectionFrameBuffer();
+		float distance = 2 * (cameraPos.y - 4.0f);
+		cameraPos.y -= distance;
+		cameraPos = glm::vec3(dist * cos(glm::radians(-vertical_angle)) * sin(glm::radians(horizontal_angle)), dist * sin(glm::radians(-vertical_angle)), dist * cos(glm::radians(-vertical_angle)) * cos(glm::radians(horizontal_angle)));
+		view = glm::lookAt(cameraPos, // camera position
+			glm::vec3(0.0f, 0.4f, 0.0f), // target position
+			glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
 		// reset viewport
 		glViewport(0, 0, 1920, 1080);
+		// Render here
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		glDepthMask(GL_FALSE);// Remember to turn depth writing off
+		skyboxShader.use();
+
+		skyboxShader.setMat4("projection", proj);
+		skyboxShader.setMat4("view", glm::mat4(glm::mat3(view)));
+
+		glBindVertexArray(skyboxVAO);
+		glActiveTexture(GL_TEXTURE0);
+		skyboxShader.setInt("skybox", 0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+		glDepthMask(GL_TRUE);
+
+		// switch to the model shader
+		ourShader.use();
+		ourShader.setBool("isDepth", false);
+		// binding the uniform matrix view and projection
+		ourShader.setMat4("projection", proj);
+		ourShader.setMat4("view", view);
+
+		// render the loaded model
+		androidBot.setScale(0.005f);
+
+
+		if (environment == normal)
+			ourShader.setInt("mapType", 0);
+		if (environment == reflection)
+			ourShader.setInt("mapType", 1);
+		if (environment == reflectionMap)
+			ourShader.setInt("mapType", 2);
+		if (environment == refraction)
+			ourShader.setInt("mapType", 3);
+		if (environment == toonShader)
+			ourShader.setInt("mapType", 4);
+
+
+		if (environment != normal)
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		androidBot.Draw();
+
+		ourShader.setVec3("viewPos", position);
+		ourShader.setVec3("light.position", lightPos);
+		ourShader.setVec3("light.color", lightColor);
+
+		if (isFloor)
+		{
+			// floor part
+			depthShader.use();
+			glm::mat4 model = glm::mat4(1.0f);
+			//model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
+			depthShader.setMat4("projection", proj);
+			depthShader.setMat4("view", view);
+			depthShader.setMat4("model", model);
+			depthShader.setVec3("lightPos", lightPos);
+			depthShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, depthMap);
+			glBindVertexArray(planeVAO);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		};
+		static int preAnimationIndex = -1;
+		if (androidBot.playMode != stop && androidBot.playMode != dev && preAnimationIndex != androidBot.curIndex)
+		{
+			loadParticleEffect(&particleShader, &androidBot, androidBot.curIndex);
+			preAnimationIndex = androidBot.curIndex;
+		}
+		if (!particleEffects.empty() && androidBot.playMode != stop)
+		{
+			for (auto& [startTime, particleEffect] : particleEffects)
+			{
+				if (androidBot.playTime < startTime)continue;
+				for (auto& particle : particleEffect)
+				{
+					particleShader.use();
+					particleShader.setMat4("projection", proj);
+					particleShader.setMat4("view", view);
+					jointState& joint = androidBot.jointMesh[particle->partName]->joint;
+					glm::mat4 parentModel = joint.scaleMatrix() * joint.translationMatrix() * joint.rotationMatrix();
+					particle->offset = androidBot.jointMesh[particle->partName]->center;
+					particle->parentModel = parentModel;
+					particle->currentTime = androidBot.playTime;
+					particle->draw();
+				}
+			}
+		}
+		waterFrameBuffers.unbindCurrentFrameBuffer();
+		cameraPos = glm::vec3(dist * cos(glm::radians(vertical_angle)) * sin(glm::radians(horizontal_angle)), dist * sin(glm::radians(vertical_angle)), dist * cos(glm::radians(vertical_angle)) * cos(glm::radians(horizontal_angle)));
+		view = glm::lookAt(cameraPos, // camera position
+			glm::vec3(0.0f, 0.4f, 0.0f), // target position
+			glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
+		cameraPos.y += distance;
+
+		waterFrameBuffers.bindRefractionFrameBuffer();
+		// reset viewport
+		glViewport(0, 0, 1920, 1080);
+		// Render here
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glDepthMask(GL_FALSE);// Remember to turn depth writing off
+		skyboxShader.use();
+
+		skyboxShader.setMat4("projection", proj);
+		skyboxShader.setMat4("view", glm::mat4(glm::mat3(view)));
+
+		glBindVertexArray(skyboxVAO);
+		glActiveTexture(GL_TEXTURE0);
+		skyboxShader.setInt("skybox", 0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+		glDepthMask(GL_TRUE);
+		if (isFloor)
+		{
+			// floor part
+			depthShader.use();
+			glm::mat4 model = glm::mat4(1.0f);
+			//model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
+			depthShader.setMat4("projection", proj);
+			depthShader.setMat4("view", view);
+			depthShader.setMat4("model", model);
+			depthShader.setVec3("lightPos", lightPos);
+			depthShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, depthMap);
+			glBindVertexArray(planeVAO);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		};
+
+		waterFrameBuffers.unbindCurrentFrameBuffer();
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 		glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
 		
@@ -445,6 +592,22 @@ int main()
 		ourShader.setVec3("light.position", lightPos);
 		ourShader.setVec3("light.color", lightColor);
 
+
+		waterShader.use();
+		waterShader.setMat4("projection", proj);
+		waterShader.setMat4("view", view);
+		waterShader.setInt("reflectionTexture", 0);
+		waterShader.setInt("refractionTexture", 1);
+		glm::mat4 waterModel = glm::mat4(1.0f);
+		waterModel = glm::scale(waterModel, glm::vec3(2.0,2.0,1.0));
+		waterShader.setMat4("model", waterModel);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, waterFrameBuffers.getReflectionTexture());
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, waterFrameBuffers.getRefractionTexture());
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glActiveTexture(GL_TEXTURE0);
 		if (isFloor)
 		{
 			// floor part
@@ -462,7 +625,6 @@ int main()
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		};
-		static int preAnimationIndex = -1; 
 		if (androidBot.playMode != stop && androidBot.playMode != dev &&preAnimationIndex != androidBot.curIndex)
 		{
 			loadParticleEffect(&particleShader, &androidBot, androidBot.curIndex);
@@ -487,8 +649,6 @@ int main()
 				}
 			}
 		}
-
-
 		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
@@ -496,11 +656,23 @@ int main()
 		glClearColor(1.f, 1.f, 1.f, 1.0f);; // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		glViewport(0, 0, 1920, 1080);
 		screenShader.use();
 		screenShader.setInt("isMosaic", isMosaic);
 		glBindVertexArray(quadVAO);
 		glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		//glViewport(0, 480, 800, 600);
+		//screenShader.setInt("isMosaic", 0);
+		//glBindVertexArray(quadVAO);
+		//glBindTexture(GL_TEXTURE_2D, waterFrameBuffers.getReflectionTexture());	// use the color attachment texture as the texture of the quad plane
+		//glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		//glViewport(1120, 480, 800, 600);
+		//glBindVertexArray(quadVAO);
+		//glBindTexture(GL_TEXTURE_2D, waterFrameBuffers.getRefractionTexture());	// use the color attachment texture as the texture of the quad plane
+		//glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		// render Depth map to quad for visual debugging
 // ---------------------------------------------
@@ -784,7 +956,7 @@ int main()
 	glDeleteBuffers(1, &quadVBO);
 	glDeleteRenderbuffers(1, &rbo);
 	glDeleteFramebuffers(1, &framebuffer);
-
+	waterFrameBuffers.cleanUp();
 
 	// Terminate GLFW
 	glfwTerminate();
@@ -878,13 +1050,15 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 		return;
 	}
 	horizontal_angle += speed * (lastX - xpos);
-	vertical_angle -= speed * (lastY - ypos);
+	if(isInversPitch)
+	vertical_angle -= speed * -(lastY - ypos);
+	else
+		vertical_angle -= speed * (lastY - ypos);
 	if (sin(glm::radians(vertical_angle)) < 0.1)vertical_angle = glm::degrees(asin(0.1));
 	if (horizontal_angle > 360)horizontal_angle -= 360;
 	if (horizontal_angle < 0)horizontal_angle += 360;
 	if (vertical_angle > 89)vertical_angle = 89;
 	if (vertical_angle < -89)vertical_angle = -89;
-
 	cameraPos = glm::vec3(dist * cos(glm::radians(vertical_angle)) * sin(glm::radians(horizontal_angle)), dist * sin(glm::radians(vertical_angle)), dist * cos(glm::radians(vertical_angle)) * cos(glm::radians(horizontal_angle)));
 	view = glm::lookAt(cameraPos, // camera position
 		glm::vec3(0.0f, 0.4f, 0.0f), // target position
