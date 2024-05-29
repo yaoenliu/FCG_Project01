@@ -54,6 +54,9 @@ int selectedFrame = 0;
 bool isMosaic = false;
 bool isFloor = false;
 
+float WAVE_SPEED = 0.001f;
+float moveFactor = 0.0f;
+
 std::map<float , vector<ParticleEffect*> > particleEffects;
 
 
@@ -191,6 +194,7 @@ int main()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	glBindVertexArray(0);
+
 
 	// screen quad VAO
 	unsigned int quadVAO, quadVBO;
@@ -339,6 +343,18 @@ int main()
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	int wwidth, wheight;
+	GLuint wdudvTexture;
+	int wnrComponents;
+	unsigned char* wdudv = stbi_load("texture/wdudv.png", &wwidth, &wheight, &wnrComponents, 0);
+	glGenTextures(1, &wdudvTexture);
+	glBindTexture(GL_TEXTURE_2D, wdudvTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, wwidth, wheight, 0, GL_RGB, GL_UNSIGNED_BYTE, wdudv);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	stbi_image_free(wdudv);
 
 	depthShader.use();
 	depthShader.setInt("shadowMap", 0);
@@ -592,6 +608,8 @@ int main()
 		ourShader.setVec3("light.position", lightPos);
 		ourShader.setVec3("light.color", lightColor);
 
+		moveFactor += 0.01;
+		moveFactor -= (int)moveFactor;
 
 		waterShader.use();
 		waterShader.setMat4("projection", proj);
@@ -601,13 +619,18 @@ int main()
 		glm::mat4 waterModel = glm::mat4(1.0f);
 		waterModel = glm::scale(waterModel, glm::vec3(2.0,2.0,1.0));
 		waterShader.setMat4("model", waterModel);
+		waterShader.setFloat("moveFactor", moveFactor);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, waterFrameBuffers.getReflectionTexture());
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, waterFrameBuffers.getRefractionTexture());
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, wdudvTexture);
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glActiveTexture(GL_TEXTURE0);
+
+
 		if (isFloor)
 		{
 			// floor part
