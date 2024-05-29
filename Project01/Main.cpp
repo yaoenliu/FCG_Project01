@@ -354,7 +354,14 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	stbi_image_free(wdudv);
+	GLuint normalMapTexture;
+	unsigned char* normalMap = stbi_load("texture/normalMap.png", &wwidth, &wheight, &wnrComponents, 0);
+	glGenTextures(1, &normalMapTexture);
+	glBindTexture(GL_TEXTURE_2D, normalMapTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, wwidth, wheight, 0, GL_RGB, GL_UNSIGNED_BYTE, normalMap);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	stbi_image_free(normalMap);
 
 	depthShader.use();
 	depthShader.setInt("shadowMap", 0);
@@ -608,7 +615,7 @@ int main()
 		ourShader.setVec3("light.position", lightPos);
 		ourShader.setVec3("light.color", lightColor);
 
-		moveFactor += 0.01;
+		moveFactor += 0.004;
 		moveFactor -= (int)moveFactor;
 
 		waterShader.use();
@@ -616,6 +623,10 @@ int main()
 		waterShader.setMat4("view", view);
 		waterShader.setInt("reflectionTexture", 0);
 		waterShader.setInt("refractionTexture", 1);
+		waterShader.setInt("dudvMap", 2);
+		waterShader.setInt("normalMap", 3);
+		waterShader.setVec3("lightPosition", lightPos);
+		waterShader.setVec3("lightColour", lightColor);
 		glm::mat4 waterModel = glm::mat4(1.0f);
 		waterModel = glm::scale(waterModel, glm::vec3(2.0,2.0,1.0));
 		waterShader.setMat4("model", waterModel);
@@ -624,10 +635,16 @@ int main()
 		waterShader.setFloat("moveFactor", moveFactor);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, waterFrameBuffers.getReflectionTexture());
+
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, waterFrameBuffers.getRefractionTexture());
+
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, wdudvTexture);
+
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, normalMapTexture);
+
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glActiveTexture(GL_TEXTURE0);
