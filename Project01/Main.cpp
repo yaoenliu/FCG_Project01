@@ -619,6 +619,8 @@ int main()
 		glm::mat4 waterModel = glm::mat4(1.0f);
 		waterModel = glm::scale(waterModel, glm::vec3(2.0,2.0,1.0));
 		waterShader.setMat4("model", waterModel);
+		waterShader.setVec3("cameraPos", glm::vec3(dist * cos(glm::radians(vertical_angle)) * sin(glm::radians(horizontal_angle)),
+			dist * sin(glm::radians(vertical_angle)), dist * cos(glm::radians(vertical_angle)) * cos(glm::radians(horizontal_angle))));
 		waterShader.setFloat("moveFactor", moveFactor);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, waterFrameBuffers.getReflectionTexture());
