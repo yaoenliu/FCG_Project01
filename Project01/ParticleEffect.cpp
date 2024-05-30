@@ -119,7 +119,7 @@ void ParticleEffect::respawnParticle(Particle& particle)
 	float randomAngle = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 2 * PI;
 	particle.offset = glm::vec3(0.0f);
 	particle.color = color;
-	particle.life = 1.0f;
+	particle.life = particleLifeTime;
 	particle.radius = radius;
 	particle.angle = randomAngle;
 	particle.hiehgtIncrement = heightIncrement;

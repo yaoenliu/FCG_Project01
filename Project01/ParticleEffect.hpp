@@ -54,6 +54,7 @@ public:
 	float lastUpdate;
 	float activeTime = 0;
 	float currentTime = 0;
+	float particleLifeTime = 1.0f;
 
 	ParticleEffect(Shader* shader, float startTime, float lifeTime, glm::vec4 color, glm::vec3 translation,
 		glm::vec3 rotation, glm::vec3 scale, float angle, float radius, float heightIncrement, int nrParticles);

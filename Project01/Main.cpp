@@ -923,8 +923,9 @@ int main()
 				ImGui::SliderFloat("Particle roty", &particleEffects[androidBot.playTime][selectedParticleEffect]->rotation.y, -180.0f, 180.0f);
 				ImGui::SliderFloat("Particle rotz", &particleEffects[androidBot.playTime][selectedParticleEffect]->rotation.z, -180.0f, 180.0f);
 				ImGui::ColorEdit3("Particle color", (float*)&particleEffects[androidBot.playTime][selectedParticleEffect]->color);
-				ImGui::SliderFloat("Particle lifeTime", &particleEffects[androidBot.playTime][selectedParticleEffect]->lifeTime, 0.0f, 10.0f);
+				ImGui::SliderFloat("Particle Effect lifeTime", &particleEffects[androidBot.playTime][selectedParticleEffect]->lifeTime, 0.0f, 10.0f);
 				ImGui::SliderFloat("Particle radius", &particleEffects[androidBot.playTime][selectedParticleEffect]->radius, 0.0f, 10.0f);
+				ImGui::SliderFloat("Particle lifeTime", &particleEffects[androidBot.playTime][selectedParticleEffect]->particleLifeTime, 0.0f, 2.0f);
 			}
 
 			// add animation button
@@ -1208,6 +1209,8 @@ void loadParticleEffect(Shader* shader , Model* robot , const int& animationInde
 			std::getline(file, strIn);
 			float lifeTime = std::stof(strIn);
 			std::getline(file, strIn);
+			float particleLifeTime = std::stof(strIn);
+			std::getline(file, strIn);
 			int nrParticles = std::stoi(strIn);
 			std::getline(file, strIn);
 			float angle = std::stof(strIn);
@@ -1235,6 +1238,7 @@ void loadParticleEffect(Shader* shader , Model* robot , const int& animationInde
 			particleEffects[time].back()->partName = partName;
 			particleEffects[time].back()->startTime = time;
 			particleEffects[time].back()->lifeTime = lifeTime;
+			particleEffects[time].back()->particleLifeTime = particleLifeTime;
 			particleEffects[time].back()->nrParticles = nrParticles;
 			particleEffects[time].back()->angle = angle;
 			particleEffects[time].back()->heightIncrement = heightIncrement;
@@ -1260,6 +1264,7 @@ void saveParticleEffect(Model* robot , const int& animationIndex)
 		{
 			file << effect->partName << "\n";
 			file << effect->lifeTime << "\n";
+			file << effect->particleLifeTime << "\n";
 			file <<effect->nrParticles<<"\n";
 			file << effect->angle << "\n";
 			file <<effect->heightIncrement<<"\n";
