@@ -755,7 +755,7 @@ int main()
 		}
 		
 		// select map type
-		const char* mapTypeItems[] = { "normal", "reflection", "reflectionMap", "refraction" , "toonShader"};
+		const char* mapTypeItems[] = { "normal", "reflection", "mxRelfectionAndRefraction", "refraction" , "toonShader"};
 		ImGui::Combo("Map Type", (int*)&environment, mapTypeItems, 5);
 
 		// select model part
