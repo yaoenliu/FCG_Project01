@@ -613,7 +613,8 @@ int main()
 			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 		androidBot.Draw();
 
-		ourShader.setVec3("viewPos", cameraPos);
+		ourShader.setVec3("viewPos", glm::vec3(dist* cos(glm::radians(vertical_angle))* sin(glm::radians(horizontal_angle)),
+			dist* sin(glm::radians(vertical_angle)), dist* cos(glm::radians(vertical_angle))* cos(glm::radians(horizontal_angle))));
 		ourShader.setVec3("light.position", lightPos);
 		ourShader.setVec3("light.color", lightColor);
 
@@ -1143,6 +1144,7 @@ GLuint loadCubemap(vector<const GLchar*> faces)
 	unsigned char* image;
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+	
 	for (GLuint i = 0; i < faces.size(); i++)
 	{
 		int nrComponents;

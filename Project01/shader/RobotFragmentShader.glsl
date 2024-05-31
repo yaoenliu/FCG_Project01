@@ -49,16 +49,19 @@ void main()
 
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(light.position - FragPos);
-
+    
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
 
+    float refractiveFactor = dot(viewDir, vec3(0.0, 1.0, 0.0));
+	refractiveFactor = pow(refractiveFactor, 2);
+
     float diff = max(dot(norm, lightDir), 0.0);
     float spec;
-    vec3 I = normalize(FragPos - viewPos);
-    vec3 Reflection = reflect(I, normalize(Normal));
-     float ratio = 1.00 / 1.52;
-    vec3 Refraction = refract(I, normalize(Normal), ratio);
+    vec3 I = -viewDir;
+    vec3 Reflection = reflect(I, -norm);
+    float ratio = 1.00 / 1.52;
+    vec3 Refraction = refract(I, -norm, ratio);
     vec4 ReflectionColour = vec4(texture(skybox, Reflection).rgb, 1.0);
     vec4 RefractionColour = vec4(texture(skybox, Refraction).rgb, 1.0);
 
@@ -109,7 +112,7 @@ void main()
     }
     else if(mapType == 2)
     {
-        vec4 enviroColour =  mix(ReflectionColour , RefractionColour,0.5);
+        vec4 enviroColour =  mix(ReflectionColour , RefractionColour, refractiveFactor);
         FragColor = mix(FragColor , enviroColour,1.0);
     }
     else if(mapType == 3)
