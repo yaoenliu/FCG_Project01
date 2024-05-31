@@ -473,7 +473,7 @@ int main()
 			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 		androidBot.Draw();
 
-		ourShader.setVec3("viewPos", position);
+		ourShader.setVec3("viewPos", cameraPos);
 		ourShader.setVec3("light.position", lightPos);
 		ourShader.setVec3("light.color", lightColor);
 
@@ -613,7 +613,7 @@ int main()
 			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 		androidBot.Draw();
 
-		ourShader.setVec3("viewPos", position);
+		ourShader.setVec3("viewPos", cameraPos);
 		ourShader.setVec3("light.position", lightPos);
 		ourShader.setVec3("light.color", lightColor);
 
