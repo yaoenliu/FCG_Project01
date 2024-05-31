@@ -48,6 +48,26 @@ ParticleEffect::ParticleEffect(Shader* shader,float startTime , float lifeTime ,
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glm::mat4 models[2];
+	for (int i = -1; i < 1; i++)
+	{
+		models[i + 1] = glm::mat4(1.0f);
+		models[i + 1] = glm::translate(models[i + 1], glm::vec3(i * 2.0f + 1, 0.0f, 0));
+	}
+
+
+	GLuint instanceVBO;
+	glGenBuffers(1, &instanceVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * 2, &models[0], GL_STATIC_DRAW);
+	GLsizei vec4Size = sizeof(glm::vec4);
+	for (int i = 0; i < 4; i++)
+	{
+		glEnableVertexAttribArray(1 + i);
+		glVertexAttribPointer(1 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(i * vec4Size));
+		glVertexAttribDivisor(1 + i, 1);
+	}
 
 	for (size_t i = 0; i < nrParticles; i++)
 	{
@@ -85,6 +105,25 @@ ParticleEffect::ParticleEffect(Shader* shader)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glm::mat4 models[2];
+	for (int i = -1; i < 1; i++)
+	{
+		models[i + 1] = glm::mat4(1.0f);
+		models[i + 1] = glm::translate(models[i + 1], glm::vec3(i * 2.0f + 1, 0.0f, 0));
+	}
+
+
+	GLuint instanceVBO;
+	glGenBuffers(1, &instanceVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * 2, &models[0], GL_STATIC_DRAW);
+	GLsizei vec4Size = sizeof(glm::vec4);
+	for (int i = 0; i < 4; i++)
+	{
+		glEnableVertexAttribArray(1 + i);
+		glVertexAttribPointer(1 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(i * vec4Size));
+		glVertexAttribDivisor(1 + i, 1);
+	}
 
 	for (size_t i = 0; i < nrParticles; i++)
 		particles.push_back(Particle());
@@ -142,7 +181,7 @@ void ParticleEffect::draw()
 		glm::mat4 particleModel = translationMatrix()*rotationMatrix()*scaleMatrix();
 		shader->setMat4("model", parentModel*particleModel);
 		glBindVertexArray(cubeVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawArraysInstanced(GL_TRIANGLES, 0, 36,2);
 		glBindVertexArray(0);
 	}
 }

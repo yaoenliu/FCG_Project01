@@ -374,6 +374,8 @@ int main()
 	ParticleEffect newParticle(&particleShader);
 	WaterFrameBuffers waterFrameBuffers;
 
+	
+
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(window))
 	{

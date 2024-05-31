@@ -138,7 +138,7 @@ public:
 
         // draw mesh
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
+        glDrawElementsInstanced(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0,2);
         glBindVertexArray(0);
 
         // always good practice to set everything back to defaults once configured.
@@ -178,20 +178,40 @@ private:
         // vertex texture coords
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
-        // vertex tangent
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
-        // vertex bitangent
-        glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
-        // ids
-        glEnableVertexAttribArray(5);
-        glVertexAttribIPointer(5, 4, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, m_BoneIDs));
+        
+        glm::mat4 models[2];
+        for (int i = -1; i < 1; i++)
+        {
+			models[i+1] = glm::mat4(1.0f);
+			models[i+1] = glm::translate(models[i+1], glm::vec3(i * 2.0f + 1, 0.0f, 0));
+		}
 
-        // weights
-        glEnableVertexAttribArray(6);
-        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_Weights));
-        glBindVertexArray(0);
+
+        GLuint instanceVBO;
+        glGenBuffers(1, &instanceVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * 2, &models[0], GL_STATIC_DRAW);
+        GLsizei vec4Size = sizeof(glm::vec4);
+        for (int i = 0; i < 4; i++)
+        {
+			glEnableVertexAttribArray(3 + i);
+			glVertexAttribPointer(3 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(i * vec4Size));
+			glVertexAttribDivisor(3 + i, 1);
+		}
+        //// vertex tangent
+        //glEnableVertexAttribArray(3);
+        //glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+        //// vertex bitangent
+        //glEnableVertexAttribArray(4);
+        //glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
+        //// ids
+        //glEnableVertexAttribArray(5);
+        //glVertexAttribIPointer(5, 4, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, m_BoneIDs));
+
+        //// weights
+        //glEnableVertexAttribArray(6);
+        //glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_Weights));
+        //glBindVertexArray(0);
     }
 };
 #endif
