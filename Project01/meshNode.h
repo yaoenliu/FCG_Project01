@@ -25,7 +25,7 @@ public:
     // model action (use when this is joint
     jointState joint;
     glm::mat4 modelMatrix;
-
+    glm::mat4 preModel;
     meshNode();
     void Draw(Shader& shader, glm::mat4 parentModel = glm::mat4(1.0f));
 };

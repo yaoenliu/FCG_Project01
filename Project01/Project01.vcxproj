@@ -195,6 +195,8 @@
     <None Include="shader\SkyboxFragmentShader.glsl" />
     <None Include="shader\SkyboxVertexShader.glsl" />
     <None Include="shader\ShadowVertexShader.glsl" />
+    <None Include="shader\VelocityFragmentShader.glsl" />
+    <None Include="shader\VelocityVertexShader.glsl" />
     <None Include="shader\WaterFragmentShader.glsl" />
     <None Include="shader\WaterVertexShader.glsl" />
   </ItemGroup>

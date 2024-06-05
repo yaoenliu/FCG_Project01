@@ -2,24 +2,23 @@
 
 out vec4 FragColor;
 in vec2 TexCoords;
-in vec2 PrevTexCoords;
 
-uniform sampler2D scene;
+uniform sampler2D screenTexture;
+uniform sampler2D velocityTexture;
 uniform float blurAmount;
 
 void main()
 {
-	vec4 color = texture(scene, TexCoords);
-	vec4 prevColor = texture(scene, PrevTexCoords);
+	vec4 color = texture(screenTexture, TexCoords);
+	vec2 velocity = texture(velocityTexture, TexCoords).xy;
 
-	vec2 motionVector = TexCoords - PrevTexCoords;
-
-	vec4 blurredColor = vec4(0.0);
-	for(int i = -4 ; i<=4 ;i++)
+	vec4 blurredColor = color;
+	for(int i = 1 ; i<= 16 ;i++)
 	{
-		blurredColor += texture(scene, TexCoords + motionVector * i * blurAmount);
+		blurredColor += texture(screenTexture, TexCoords + velocity * i * blurAmount);
 	}
-	blurredColor /= 9.0;
+	blurredColor /= 16.0f;
 
-	FragColor = mix(color, blurredColor, 0.5);
+	FragColor = blurredColor;
+	//FragColor = color;
 }

@@ -205,5 +205,11 @@
     <None Include="shader\WaterVertexShader.glsl">
       <Filter>Shader</Filter>
     </None>
+    <None Include="shader\VelocityFragmentShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="shader\VelocityVertexShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

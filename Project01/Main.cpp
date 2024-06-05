@@ -30,8 +30,8 @@ void saveParticleEffect(Model* robot,const int& animationIndex);
 
 bool isInversPitch = false;
 // camera and color variables
-glm::mat4 proj; // projection matrix
-glm::mat4 view; // view matrix
+glm::mat4 proj , preProj; // projection matrix
+glm::mat4 view , preView; // view matrix
 glm::vec4 color; // color 
 glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f); // model position
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.3f, 3.0f); // camera position
@@ -152,10 +152,12 @@ int main()
 	GLFWwindow* window = glfwCreateWindow(1920, 1080, "Computer Graphics Project 1", NULL, NULL);
 	// set up the camera
 	proj = glm::perspective(glm::radians(45.0f), 1920.f / 1080.f, 0.1f, 100.0f);
+	preProj = proj;
 	view = glm::lookAt(
 		cameraPos, // camera position
 		glm::vec3(0.0f, 0.4f, 0.0f), // target position
 		glm::vec3(0.0f, 1.0f, 0.0f)); // up vector
+	preView = view;
 
 	// set the initial color
 	color = glm::vec4(105.0 / 255, 72.0 / 255, 40.0 / 255, 1.0f);
@@ -250,10 +252,14 @@ int main()
 
 	Shader waterShader("shader/WaterVertexShader.glsl", "shader/WaterFragmentShader.glsl");
 
+	Shader velocityShader("shader/VelocityVertexShader.glsl", "shader/VelocityFragmentShader.glsl");
+
+	Shader motionBlurShader("shader/MotionBlurVertexShader.glsl", "shader/MotionBlurFragmentShader.glsl");
+
 
 	// load models
 	Model androidBot("robot/robot.obj");
-	androidBot.setShader(&ourShader);
+	androidBot.setShader(&velocityShader);
 
 	// make animation
 	float frameTime = 0.0f;
@@ -294,6 +300,19 @@ int main()
 
 	screenShader.use();
 	screenShader.setInt("screenTexture", 0);
+
+	GLuint vfbo;
+	glGenFramebuffers(1, &vfbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, vfbo);
+	// create a color attachment texture
+	GLuint vTexture;
+	glGenTextures(1, &vTexture);
+	glBindTexture(GL_TEXTURE_2D, vTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1920, 1080, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, vTexture, 0);
 
 	// framebuffer configuration
 	// -------------------------
@@ -374,6 +393,10 @@ int main()
 	ParticleEffect newParticle(&particleShader);
 	WaterFrameBuffers waterFrameBuffers;
 
+	motionBlurShader.use();
+	motionBlurShader.setInt("screenTexture", 0);
+	motionBlurShader.setInt("velocityTexture", 1);
+
 	
 
 	// Loop until the user closes the window
@@ -393,11 +416,33 @@ int main()
 		lightSpaceMatrix = lightProjection * lightView;
 		// render scene from light's point of view
 
+		glBindFramebuffer(GL_FRAMEBUFFER, vfbo);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		androidBot.setShader(&velocityShader);
+		glViewport(0, 0, 1920, 1080);
+		velocityShader.use();
+		velocityShader.setMat4("currProj", proj);
+		velocityShader.setMat4("currView", view);
+		velocityShader.setMat4("prevProj", preProj);
+		velocityShader.setMat4("prevView", preView);
+		static float preTime = glfwGetTime();
+		float nowTime = glfwGetTime();
+		velocityShader.setFloat("deltaTime", 1e3 * (nowTime - preTime));
+		preTime = nowTime;
+		preProj = proj;
+		preView = view;
+		androidBot.setScale(0.005f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		androidBot.Draw();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_DEPTH_BUFFER_BIT);
-
+		androidBot.setShader(&ourShader);
 		// switch to the model shader
 		ourShader.use();
 		ourShader.setBool("isDepth", true);
@@ -701,12 +746,30 @@ int main()
 		glClearColor(1.f, 1.f, 1.f, 1.0f);; // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		//glViewport(0, 0, 1920, 1080);
+		//screenShader.use();
+		//screenShader.setInt("isMosaic", isMosaic);
+		//glBindVertexArray(quadVAO);
+		//glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
+		//glDrawArrays(GL_TRIANGLES, 0, 6);
+
 		glViewport(0, 0, 1920, 1080);
-		screenShader.use();
-		screenShader.setInt("isMosaic", isMosaic);
+		motionBlurShader.use();
+		motionBlurShader.setFloat("blurAmount", 0.004);
 		glBindVertexArray(quadVAO);
-		glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, vTexture);	// use the color attachment texture as the texture of the quad plane
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glActiveTexture(GL_TEXTURE0);
+
+		//glViewport(0, 480, 800, 600);
+		//screenShader.use();
+		//screenShader.setInt("isMosaic", 0);
+		//glBindVertexArray(quadVAO);
+		//glBindTexture(GL_TEXTURE_2D, vTexture);	// use the color attachment texture as the texture of the quad plane
+		//glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		//glViewport(0, 480, 800, 600);
 		//screenShader.setInt("isMosaic", 0);

@@ -14,10 +14,12 @@ void meshNode::Draw(Shader& shader, glm::mat4 parentModel)
         modelMatrix = glm::mat4(1.0f);
 
     shader.setMat4("model", parentModel * modelMatrix);
+    shader.setMat4("preModel", preModel);
     for (unsigned int i = 0; i < meshes.size(); i++)
         meshes[i].Draw(shader);
     for (int i = 0; i < children.size(); i++)
         children[i]->Draw(shader, parentModel * modelMatrix);
+    preModel = parentModel * modelMatrix;
 }
 
 meshNode::meshNode()
@@ -25,5 +27,6 @@ meshNode::meshNode()
     name = "";
     isJoint = 0;
     modelMatrix = glm::mat4(1.0f);
+    preModel = glm::mat4(1.0f);
     center = glm::vec3(0.0f);
 }
