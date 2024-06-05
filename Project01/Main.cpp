@@ -56,6 +56,7 @@ bool isFloor = false;
 
 float WAVE_SPEED = 0.001f;
 float moveFactor = 0.0f;
+float blurAmount = 0.0002f;
 
 std::map<float , vector<ParticleEffect*> > particleEffects;
 
@@ -746,23 +747,29 @@ int main()
 		glClearColor(1.f, 1.f, 1.f, 1.0f);; // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		//glViewport(0, 0, 1920, 1080);
-		//screenShader.use();
-		//screenShader.setInt("isMosaic", isMosaic);
-		//glBindVertexArray(quadVAO);
-		//glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
-		//glDrawArrays(GL_TRIANGLES, 0, 6);
+		if (isMosaic)
+		{
+			glViewport(0, 0, 1920, 1080);
+			screenShader.use();
+			screenShader.setInt("isMosaic", isMosaic);
+			glBindVertexArray(quadVAO);
+			glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+		else
+		{
+			glViewport(0, 0, 1920, 1080);
+			motionBlurShader.use();
+			motionBlurShader.setFloat("blurAmount", blurAmount);
+			glBindVertexArray(quadVAO);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, vTexture);	// use the color attachment texture as the texture of the quad plane
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+			glActiveTexture(GL_TEXTURE0);
+		}
 
-		glViewport(0, 0, 1920, 1080);
-		motionBlurShader.use();
-		motionBlurShader.setFloat("blurAmount", 0.004);
-		glBindVertexArray(quadVAO);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, vTexture);	// use the color attachment texture as the texture of the quad plane
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		glActiveTexture(GL_TEXTURE0);
 
 		//glViewport(0, 480, 800, 600);
 		//screenShader.use();
@@ -806,7 +813,7 @@ int main()
 		ImGui::Begin("Animation Control Panel");
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);½u®Ø¼Ò¦¡
 
-
+		ImGui::InputFloat("blurAmount", &blurAmount, 0.0f, 0.0f, "%.4f");
 		ImGui::SliderFloat("lightX", &lightPos.x, -100.0f, 100.0f);
 		ImGui::SliderFloat("lightY", &lightPos.y, -100.0f, 100.0f);
 		ImGui::SliderFloat("lightZ", &lightPos.z, -100.0f, 100.0f);
